@@ -376,6 +376,11 @@
         <div class="head"><h2>✅ 퇴사 후 체크리스트</h2></div>
         <div class="progress-line"><span>진행 상황</span><span id="checkCount">0 / 6</span></div>
         <div class="checklist" id="checkList"></div>
+        <div class="row" style="margin-top:12px;">
+          <input type="text" id="checkTitleInput" placeholder="추가할 항목 (예: 원천징수영수증 받기)" maxlength="50" style="flex:1;margin:0;">
+          <button class="btn pri" id="addCheckBtn" type="button" style="width:auto;padding:0 18px;height:44px;flex-shrink:0;">추가</button>
+        </div>
+        <input type="text" id="checkDescInput" placeholder="간단 메모 (선택)" maxlength="80" style="margin-top:8px;">
       </div>
       <p class="foot">입력한 내용은 이 폰 브라우저에만 저장돼요. Safari 공유 → <b>홈 화면에 추가</b>를 하면 앱처럼 열려요.</p>
     </section>
@@ -1311,7 +1316,8 @@
 
   // 체크리스트
   var CHECK_KEY = 'nahong_check_v1';
-  var CHECKS = [
+  var CUSTOM_CHECK_KEY = 'nahong_check_custom_v1';
+  var DEFAULT_CHECKS = [
     { id: 'c1', t: '이직확인서 처리 확인', d: '사업주 신고 여부와 상실코드(계약만료 등)가 맞는지 확인' },
     { id: 'c2', t: '고용24 구직신청', d: '실업급여 수급의 전제 · 온라인으로 신청 가능' },
     { id: 'c3', t: '실업급여 수급자격 신청', d: '이직일 다음 날부터 12개월 안에 관할 고용센터에 신청' },
@@ -1319,16 +1325,20 @@
     { id: 'c5', t: '연차미사용수당 정산', d: '퇴직 전 남은 연차 일수와 지급 여부 확인' },
     { id: 'c6', t: '퇴직연금(IRP) 정산', d: 'DC형·IRP 계좌로 이전하고 운용 상태 확인' }
   ];
+  var customChecks = store.get(CUSTOM_CHECK_KEY, []);
   var checkDone = store.get(CHECK_KEY, {});
+  function getAllChecks() { return DEFAULT_CHECKS.concat(customChecks); }
   function renderChecks() {
-    var done = CHECKS.filter(function (c) { return checkDone[c.id]; }).length;
-    $('#checkCount').textContent = done + ' / ' + CHECKS.length;
-    $('#checkList').innerHTML = CHECKS.map(function (c) {
+    var all = getAllChecks();
+    var done = all.filter(function (c) { return checkDone[c.id]; }).length;
+    $('#checkCount').textContent = done + ' / ' + all.length;
+    $('#checkList').innerHTML = all.map(function (c) {
       var on = !!checkDone[c.id];
+      var delBtn = c.custom ? '<button class="del" data-act="delCheck" aria-label="항목 삭제">×</button>' : '';
       return '<div class="item" data-id="' + c.id + '">' +
         '<button class="cb' + (on ? ' on' : '') + '" data-act="check" aria-label="' + escapeHtml(c.t) + ' 체크">✓</button>' +
-        '<div class="body"><div class="title" style="' + (on ? 'color:#B49C8C;text-decoration:line-through;' : '') + '">' + c.t + '</div>' +
-        '<div class="desc">' + c.d + '</div></div></div>';
+        '<div class="body"><div class="title" style="' + (on ? 'color:#B49C8C;text-decoration:line-through;' : '') + '">' + escapeHtml(c.t) + '</div>' +
+        (c.d ? '<div class="desc">' + escapeHtml(c.d) + '</div>' : '') + '</div>' + delBtn + '</div>';
     }).join('');
     $$('#checkList .cb').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -1340,7 +1350,31 @@
         renderChecks();
       });
     });
+    $$('#checkList [data-act="delCheck"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.closest('.item').getAttribute('data-id');
+        if (!confirm('이 체크리스트 항목을 지울까요?')) return;
+        customChecks = customChecks.filter(function (x) { return x.id !== id; });
+        delete checkDone[id];
+        store.set(CUSTOM_CHECK_KEY, customChecks);
+        store.set(CHECK_KEY, checkDone);
+        renderChecks();
+      });
+    });
   }
+  function addCustomCheck() {
+    var t = $('#checkTitleInput').value.trim();
+    if (!t) { toast('추가할 항목을 입력해 주세요'); $('#checkTitleInput').focus(); return; }
+    var d = $('#checkDescInput').value.trim();
+    customChecks.push({ id: 'cu_' + Date.now(), t: t, d: d, custom: true });
+    store.set(CUSTOM_CHECK_KEY, customChecks);
+    $('#checkTitleInput').value = '';
+    $('#checkDescInput').value = '';
+    renderChecks();
+    toast('체크리스트에 추가했어요');
+  }
+  $('#addCheckBtn').addEventListener('click', addCustomCheck);
+  $('#checkTitleInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') addCustomCheck(); });
 
   /* ================= 초기화 ================= */
   renderQuiz();
