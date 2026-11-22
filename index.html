@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="나홍이 툴킷">
+<meta name="theme-color" content="#FFF8F0">
+<meta name="format-detection" content="telephone=no">
+<title>🍊 나홍이 툴킷</title>
+<style>
+  :root{
+    --cream:#FFF8F0; --card:#FFFFFF; --orange:#FF7A1A; --orange-2:#FFA063; --orange-soft:#FFF0E2;
+    --ink:#3B2B21; --muted:#96796A; --line:#F1E3D6;
+    --green:#15803D; --green-soft:#E9F7EE; --red:#D93A3A; --red-soft:#FDECEC;
+    --shadow:0 4px 18px rgba(175,118,70,.10);
+    --r:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  [hidden]{display:none!important;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#F2E7DC;color:var(--ink);font-size:15px;line-height:1.5;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+    -webkit-font-smoothing:antialiased;overscroll-behavior-y:contain;
+  }
+  .app{
+    max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--cream);
+    box-shadow:0 0 40px rgba(120,80,50,.12);position:relative;padding-bottom:calc(92px + env(safe-area-inset-bottom));
+  }
+  header{
+    padding:calc(16px + env(safe-area-inset-top)) 18px 12px;display:flex;align-items:center;gap:11px;
+    position:sticky;top:0;z-index:20;background:rgba(255,248,240,.97);
+    -webkit-backdrop-filter:saturate(160%) blur(10px);backdrop-filter:saturate(160%) blur(10px);
+  }
+  .logo{
+    width:42px;height:42px;border-radius:14px;flex:none;display:grid;place-items:center;font-size:22px;
+    background:linear-gradient(140deg,#FFE3C6,#FFC98E);box-shadow:0 3px 10px rgba(214,140,70,.22);
+  }
+  h1{font-size:18.5px;margin:0;letter-spacing:-.4px;font-weight:800;}
+  .sub{font-size:11.5px;color:var(--muted);margin-top:1px;letter-spacing:-.2px;}
+  main{padding:0 14px;}
+  section.tab{display:none;animation:fade .18s ease-out;}
+  section.tab.active{display:block;}
+  @keyframes fade{from{opacity:.4;transform:translateY(3px);}to{opacity:1;transform:none;}}
+
+  .card{background:var(--card);border-radius:var(--r);padding:15px;box-shadow:var(--shadow);border:1px solid rgba(241,227,214,.75);margin-bottom:13px;}
+  .card h2{font-size:14.5px;margin:0;display:flex;align-items:center;gap:6px;letter-spacing:-.3px;font-weight:800;}
+  .card .head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;}
+  .hint{font-size:12px;color:var(--muted);line-height:1.5;margin:5px 0 0;letter-spacing:-.2px;}
+  .hint b{color:#C2551A;font-weight:700;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:13px;
+    min-height:46px;padding:0 16px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:-.3px;
+    background:var(--orange);color:#fff;box-shadow:0 3px 10px rgba(255,122,26,.28);cursor:pointer;
+  }
+  .btn:active{transform:scale(.985);}
+  .btn.ghost{background:#FBF1E7;color:#8A6A55;box-shadow:none;border:1px solid var(--line);}
+  .btn.line{background:#fff;color:#C2551A;border:1.5px solid #FFD9B8;box-shadow:none;}
+  .btn.small{min-height:40px;font-size:13px;padding:0 13px;border-radius:11px;}
+  .btn:disabled{opacity:.42;box-shadow:none;cursor:default;}
+  .btn.full{width:100%;}
+  .row{display:flex;gap:8px;}
+  .row > *{flex:1;}
+
+  /* ---------- tabs bar ---------- */
+  .tabbar{
+    position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:60;
+    background:rgba(255,255,255,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);display:flex;gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tabbar button{
+    flex:1;border:0;background:none;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:11px;font-weight:600;color:#A98D7B;padding:5px 2px;min-height:54px;border-radius:14px;letter-spacing:-.3px;
+  }
+  .tabbar button .ico{font-size:20px;line-height:1.15;}
+  .tabbar button.active{color:var(--orange);background:var(--orange-soft);font-weight:800;}
+
+  /* ---------- photo tab ---------- */
+  .picker{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
+    border:2px dashed #F2CFAD;border-radius:16px;padding:22px 14px;background:#FFFCF8;cursor:pointer;
+  }
+  .picker .big{font-size:30px;line-height:1;}
+  .picker strong{font-size:14px;color:#C2551A;}
+  .picker span{font-size:11.5px;color:var(--muted);}
+  .canvas-wrap{position:relative;background:#2A1E17;border-radius:14px;overflow:hidden;margin:12px 0 0;}
+  #photoCanvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none;}
+  .exif-badge{
+    position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;
+    background:rgba(21,128,61,.94);color:#fff;font-size:10px;font-weight:700;padding:4px 8px;border-radius:999px;
+    letter-spacing:-.2px;box-shadow:0 2px 6px rgba(0,0,0,.2);pointer-events:none;
+  }
+  .seg{display:flex;gap:5px;background:#F8EEE4;padding:4px;border-radius:14px;margin-top:8px;}
+  .seg button{
+    flex:1;border:0;background:transparent;font-family:inherit;font-size:12px;color:#9C8171;font-weight:600;
+    padding:9px 2px;min-height:40px;border-radius:11px;letter-spacing:-.4px;
+  }
+  .seg button.active{background:#fff;color:#E4660E;font-weight:800;box-shadow:0 2px 6px rgba(180,120,70,.14);}
+  .field-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;}
+  .field-row label{font-size:12.5px;color:#7E6455;font-weight:600;}
+  .sw{width:48px;height:28px;border-radius:999px;background:#E8DACD;position:relative;border:0;flex:none;transition:background .18s;cursor:pointer;}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.22);}
+  .sw.on{background:var(--orange);}
+  .sw.on::after{left:23px;}
+  .fields{display:flex;flex-direction:column;gap:7px;margin-top:9px;}
+  input[type=text],input[type=date]{
+    width:100%;border:1px solid var(--line);background:#FFFCF8;border-radius:12px;padding:0 12px;height:44px;
+    font-size:14px;font-family:inherit;color:var(--ink);letter-spacing:-.2px;
+  }
+  input::placeholder{color:#C3AA98;}
+  input:focus{outline:2px solid #FFE2C8;border-color:var(--orange-2);}
+  input[type=range]{width:100%;accent-color:var(--orange);height:32px;margin:0;}
+  .tools{display:flex;gap:7px;margin-top:6px;}
+  .preview-img{width:100%;border-radius:14px;border:1px solid var(--line);display:block;margin-top:10px;}
+  .savemsg{font-size:12px;color:#7E6455;margin-top:8px;line-height:1.5;background:#FFF7EE;border:1px solid #FFE6CC;border-radius:12px;padding:9px 11px;}
+
+  /* ---------- quiz tab ---------- */
+  .quiz-stats{display:flex;align-items:center;justify-content:space-between;margin-top:11px;font-size:12px;color:#8A6A55;font-weight:600;}
+  .quiz-stats b{color:#E4660E;}
+  .pbar{height:6px;border-radius:99px;background:#F6E9DC;margin-top:8px;overflow:hidden;}
+  .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FFB169,#FF7A1A);border-radius:99px;transition:width .25s;}
+  .qmeta{display:flex;align-items:center;gap:6px;margin-bottom:9px;}
+  .qtag{font-size:10.5px;font-weight:800;color:#C2551A;background:var(--orange-soft);border-radius:999px;padding:3px 8px;letter-spacing:-.2px;}
+  .qnum{font-size:11px;color:var(--muted);font-weight:700;}
+  .qtext{font-size:14.5px;line-height:1.62;margin:0 0 13px;letter-spacing:-.35px;font-weight:600;}
+  .choice{
+    display:flex;gap:9px;align-items:flex-start;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);
+    border-radius:14px;padding:11px 12px;font-family:inherit;font-size:13.5px;line-height:1.5;color:var(--ink);
+    margin-bottom:7px;min-height:50px;cursor:pointer;letter-spacing:-.3px;
+  }
+  .choice .num{
+    flex:none;width:23px;height:23px;border-radius:50%;background:var(--orange-soft);color:#E4660E;
+    font-size:12px;font-weight:800;display:grid;place-items:center;margin-top:1px;
+  }
+  .choice.sel{border-color:var(--orange);}
+  .choice.correct{border-color:var(--green);background:var(--green-soft);}
+  .choice.correct .num{background:var(--green);color:#fff;}
+  .choice.wrong{border-color:var(--red);background:var(--red-soft);}
+  .choice.wrong .num{background:var(--red);color:#fff;}
+  .choice.dim{opacity:.5;}
+  .choice:disabled{cursor:default;}
+  .exp{margin-top:11px;border-radius:14px;padding:12px;background:#FFF7EE;border:1px solid #FFE3C6;display:none;}
+  .exp.on{display:block;}
+  .exp .res{font-size:13px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px;}
+  .exp .res.ok{color:var(--green);}
+  .exp .res.no{color:var(--red);}
+  .exp p{margin:0;font-size:13px;line-height:1.62;color:#5C4638;letter-spacing:-.3px;}
+  .exp .basis{font-size:10.5px;color:#A98D7B;margin-top:7px;}
+  .quiz-nav{display:flex;gap:8px;margin:2px 0 6px;}
+  .linkbtn{
+    display:block;margin:6px auto 0;background:none;border:0;font-family:inherit;font-size:12px;color:#A98D7B;
+    text-decoration:underline;text-underline-offset:3px;padding:9px;min-height:40px;
+  }
+  .result{text-align:center;padding:24px 16px;}
+  .result .face{font-size:38px;}
+  .result .score{font-size:17px;font-weight:800;margin-top:8px;letter-spacing:-.4px;}
+  .result .score b{color:#E4660E;font-size:24px;}
+  .result .acc{font-size:13px;color:var(--muted);margin-top:3px;}
+  .result .row{margin-top:14px;}
+  .emptystate{text-align:center;padding:26px 14px;color:var(--muted);font-size:13px;line-height:1.6;}
+  .emptystate .face{font-size:32px;display:block;margin-bottom:6px;}
+
+  /* ---------- todo/calc tab ---------- */
+  .item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .item:last-child{border-bottom:0;padding-bottom:0;}
+  .cb{
+    width:24px;height:24px;flex:none;border-radius:8px;border:1.5px solid #DCC8B6;background:#fff;color:transparent;
+    display:grid;place-items:center;font-size:13px;font-weight:900;margin-top:1px;cursor:pointer;
+  }
+  .cb.on{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .item .body{flex:1;min-width:0;}
+  .item .title{font-size:13.5px;font-weight:700;letter-spacing:-.3px;line-height:1.4;word-break:keep-all;}
+  .item.done .title{color:#B49C8C;text-decoration:line-through;}
+  .item .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px;}
+  .item .date{font-size:11px;color:#8A6A55;font-weight:600;}
+  .item .memo{font-size:11.5px;color:var(--muted);margin-top:2px;letter-spacing:-.2px;word-break:keep-all;}
+  .dday{font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;background:#F4EADF;color:#96796A;}
+  .dday.today{background:#FFE2C8;color:#C2551A;}
+  .dday.over{background:#F3E6E6;color:#B06868;}
+  .del{flex:none;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#B99F8C;font-size:15px;line-height:1;cursor:pointer;font-family:inherit;}
+  .addbox{display:flex;flex-direction:column;gap:7px;margin-top:10px;padding-top:11px;border-top:1px solid var(--line);}
+  .addbox .row{gap:7px;}
+  .calc-out{background:linear-gradient(140deg,#FFF4E7,#FFE6CC);border:1px solid #FFDDBB;border-radius:16px;padding:15px;margin-top:11px;text-align:center;}
+  .calc-out .label{font-size:11.5px;color:#A9764F;font-weight:700;letter-spacing:-.2px;}
+  .calc-out .big{font-size:27px;font-weight:800;color:#DD5A08;letter-spacing:-1px;margin-top:1px;line-height:1.25;}
+  .calc-out .sub{font-size:12.5px;color:#8A6A55;margin-top:5px;font-weight:600;}
+  .calc-out .sub b{color:#C2551A;}
+  .calc-line{font-size:11.5px;color:#A98D7B;margin-top:6px;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;}
+  .chip{
+    border:1.5px solid #F0DCCA;background:#fff;border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:700;
+    color:#8A6A55;padding:0 12px;height:40px;letter-spacing:-.3px;cursor:pointer;
+  }
+  .chip.on{background:var(--orange-soft);border-color:#FFC79B;color:#D95B06;}
+  .calc-input{position:relative;margin-top:7px;}
+  .calc-input input{padding-right:34px;font-size:16px;font-weight:800;letter-spacing:-.3px;}
+  .calc-input .unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#B49C8C;font-weight:700;}
+  .checklist .item{padding:11px 0;}
+  .checklist .desc{font-size:11px;color:#B09884;margin-top:2px;line-height:1.45;word-break:keep-all;}
+  .progress-line{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:#8A6A55;font-weight:700;margin-top:9px;}
+  .foot{font-size:11px;color:#B09884;text-align:center;line-height:1.6;padding:4px 10px 2px;letter-spacing:-.2px;}
+  .foot b{color:#8A6A55;}
+
+  #toast{
+    position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translate(-50%,14px);
+    background:rgba(59,43,33,.94);color:#fff;font-size:12.5px;font-weight:600;padding:10px 16px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:.22s;z-index:100;max-width:86%;text-align:center;letter-spacing:-.3px;
+  }
+  #toast.on{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">🍊</div>
+    <div>
+      <h1>나홍이 툴킷</h1>
+      <div class="sub">내 폰 안에서만 안전하게 돌아가는 미니 앱</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ TAB 1 : 사진도구 ============ -->
+    <section class="tab active" id="tab-photo">
+      <div class="card">
+        <div class="head"><h2>📸 사진 편집</h2>
+          <button class="btn ghost small" id="changePhoto" hidden>다른 사진</button>
+        </div>
+        <p class="hint">사진을 고르면 폰 안에서만 편집돼요. 서버로 보내지 않아요.</p>
+        <label class="picker" id="picker" for="fileInput">
+          <span class="big">🖼️</span>
+          <strong>사진 선택하기</strong>
+          <span>블로그·클립 사진을 골라주세요</span>
+        </label>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+
+        <div id="canvasWrap" class="canvas-wrap" hidden>
+          <canvas id="photoCanvas"></canvas>
+          <div class="exif-badge" id="exifBadge">🔒 EXIF 위치정보 자동 제거됨</div>
+        </div>
+      </div>
+
+      <div id="editor" hidden>
+        <div class="card">
+          <div class="head"><h2>✂️ 비율</h2></div>
+          <p class="hint">가운데 기준으로 잘라요. 비율을 바꾸면 모자이크는 새로 칠해야 해요.</p>
+          <div class="seg" id="ratioSeg">
+            <button data-ratio="orig" class="active">원본</button>
+            <button data-ratio="1">1:1<br><span style="font-size:9.5px;font-weight:600;">블로그 대표</span></button>
+            <button data-ratio="0.5625">9:16<br><span style="font-size:9.5px;font-weight:600;">클립·릴스</span></button>
+            <button data-ratio="1.3333333">4:3</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="head"><h2>🩹 모자이크</h2><span class="hint" style="margin:0;">손가락으로 문질러요</span></div>
+          <p class="hint">얼굴·차량번호·좌석번호처럼 가리고 싶은 곳을 칠하면 돼요.</p>
+          <div class="field-row" style="margin-top:10px;">
+            <label for="brush">브러시 크기</label>
+            <span class="hint" id="brushVal" style="margin:0;font-weight:700;color:#C2551A;">48</span>
+          </div>
+          <input type="range" id="brush" min="18" max="96" step="6" value="48">
+          <div class="tools">
+            <button class="btn ghost small" id="undoBtn" disabled>↩ 되돌리기</button>
+            <button class="btn ghost small" id="resetMosaic">초기화</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="head"><h2>🖤 대표사진 라벨</h2>
+            <button class="sw" id="labelSw" role="switch" aria-checked="false" aria-label="라벨 켜기"></button>
+          </div>
+          <p class="hint">아래쪽에 검정 그라데이션과 두 줄 제목을 얹어요.</p>
+          <div class="fields" id="labelFields" hidden>
+            <input type="text" id="labelTitle" maxlength="24" placeholder="예) 오늘의 맛집">
+            <input type="text" id="labelSub" maxlength="34" placeholder="예) 쫀득한 특수부위 맛집">
+          </div>
+          <div class="field-row" style="margin-top:14px;border-top:1px solid var(--line);padding-top:11px;">
+            <label for="wmSw">나홍이 워터마크</label>
+            <button class="sw" id="wmSw" role="switch" aria-checked="false" aria-label="워터마크 켜기"></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="head"><h2>💾 저장</h2></div>
+          <p class="hint">저장 버튼을 누르면 이미지가 만들어져요. 안 열리면 미리보기를 길게 눌러 저장해 주세요.</p>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" id="saveJpg">JPG 저장</button>
+            <button class="btn line" id="savePng">PNG 저장</button>
+          </div>
+          <div id="saveResult" hidden>
+            <img id="savePreview" class="preview-img" alt="저장 결과 미리보기">
+            <div class="savemsg" id="saveMsg"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="foot">🔒 고른 사진은 브라우저 메모리에서만 열리고, 저장한 이미지에는 <b>촬영 위치·기기 정보(EXIF)가 남지 않아요.</b></p>
+    </section>
+
+    <!-- ============ TAB 2 : 청구사퀴즈 ============ -->
+    <section class="tab" id="tab-quiz">
+      <div class="card">
+        <div class="head"><h2>🦷 청구사 3급 실전</h2></div>
+        <div class="seg" id="quizMode" style="margin-top:2px;">
+          <button data-mode="all" class="active">전체 15문제</button>
+          <button data-mode="wrong">틀린 문제 <span id="wrongCount">0</span></button>
+        </div>
+        <div class="quiz-stats">
+          <span id="qStat">정답 0 · 오답 0</span>
+          <span id="qAcc">정답률 -</span>
+        </div>
+        <div class="pbar"><i id="qBar"></i></div>
+      </div>
+
+      <div id="quizBody"></div>
+
+      <div class="quiz-nav" id="quizNav">
+        <button class="btn ghost" id="qPrev">← 이전</button>
+        <button class="btn" id="qNext">다음 →</button>
+      </div>
+      <button class="linkbtn" id="qReset">퀴즈 기록 초기화</button>
+      <p class="foot">답을 고르면 바로 채점하고, 틀린 문제는 이 폰에만 저장돼요.</p>
+    </section>
+
+    <!-- ============ TAB 3 : 일정·계산 ============ -->
+    <section class="tab" id="tab-todo">
+      <div class="card">
+        <div class="head"><h2>📋 체험단·할 일</h2><span class="hint" style="margin:0;" id="todoCount">0개</span></div>
+        <div id="todoList"></div>
+        <div class="addbox">
+          <input type="text" id="todoTitle" maxlength="40" placeholder="할 일 (예: 신제품 체험단 방문)">
+          <div class="row" style="align-items:flex-end;">
+            <div style="flex:1;min-width:0;">
+              <div class="hint" style="margin:0 0 4px;font-size:11px;">마감일 · 방문일 (선택)</div>
+              <input type="date" id="todoDate" aria-label="마감일 또는 방문일">
+            </div>
+            <button class="btn small" id="todoAdd" style="flex:none;min-width:74px;min-height:44px;">추가</button>
+          </div>
+          <input type="text" id="todoMemo" maxlength="50" placeholder="메모 (선택)">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>💰 실업급여 계산기</h2><span class="hint" style="margin:0;">2026년 기준</span></div>
+        <p class="hint">하한액·상한액 버튼으로 바로 넣을 수 있어요.</p>
+        <div class="calc-input">
+          <input type="text" id="dailyPay" inputmode="numeric" value="66,048" aria-label="1일 수령액">
+          <span class="unit">원</span>
+        </div>
+        <div class="chips">
+          <button class="chip" data-pay="66048">하한액 66,048원</button>
+          <button class="chip" data-pay="68100">상한액 68,100원</button>
+        </div>
+        <div style="margin-top:12px;font-size:12.5px;font-weight:700;color:#7E6455;">수급일수</div>
+        <div class="chips" id="daysChips">
+          <button class="chip" data-days="120">120일</button>
+          <button class="chip" data-days="150">150일</button>
+          <button class="chip on" data-days="180">180일</button>
+          <button class="chip" data-days="210">210일</button>
+          <button class="chip" data-days="240">240일</button>
+        </div>
+        <div class="calc-out">
+          <div class="label">총 예상 수령액</div>
+          <div class="big" id="calcTotal">11,888,640원</div>
+          <div class="sub">월 환산(30일) <b id="calcMonth">1,981,440원</b></div>
+          <div class="calc-line" id="calcLine">1일 66,048원 × 180일</div>
+        </div>
+        <p class="hint">세전 기준이에요. 실제 지급액은 이직 전 평균임금과 소정급여일수에 따라 달라져요.</p>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>✅ 퇴사 후 체크리스트</h2></div>
+        <div class="progress-line"><span>진행 상황</span><span id="checkCount">0 / 6</span></div>
+        <div class="checklist" id="checkList"></div>
+      </div>
+      <p class="foot">입력한 내용은 이 폰 브라우저에만 저장돼요. Safari 공유 → <b>홈 화면에 추가</b>를 하면 앱처럼 열려요.</p>
+    </section>
+  </main>
+
+  <nav class="tabbar" role="tablist">
+    <button data-tab="photo" class="active" role="tab" aria-selected="true"><span class="ico">📸</span>사진도구</button>
+    <button data-tab="quiz" role="tab" aria-selected="false"><span class="ico">🦷</span>청구사퀴즈</button>
+    <button data-tab="todo" role="tab" aria-selected="false"><span class="ico">📋</span>일정·계산</button>
+  </nav>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= 공용 ================= */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var fmt = function (n) { return Number(n || 0).toLocaleString('ko-KR'); };
+  var store = {
+    warned: false,
+    get: function (k, d) {
+      try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; }
+    },
+    set: function (k, v) {
+      try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+      catch (e) {
+        if (!store.warned) {
+          store.warned = true;
+          setTimeout(function () {
+            toast('이 화면에선 기록 저장이 막혀 있어요. Safari나 홈 화면으로 열면 저장돼요');
+          }, 400);
+        }
+        return false;
+      }
+    }
+  };
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('on'); }, 2100);
+  }
+
+  /* ================= 탭 전환 ================= */
+  var tabs = ['photo', 'quiz', 'todo'];
+  function switchTab(name) {
+    tabs.forEach(function (n) {
+      $('#tab-' + n).classList.toggle('active', n === name);
+    });
+    $$('.tabbar button').forEach(function (b) {
+      var on = b.getAttribute('data-tab') === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    window.scrollTo(0, 0);
+  }
+  $$('.tabbar button').forEach(function (b) {
+    b.addEventListener('click', function () { switchTab(b.getAttribute('data-tab')); });
+  });
+
+  /* ================= TAB 1 : 사진도구 ================= */
+  var CELL = 18;
+  var photo = {
+    img: null,
+    ratio: 'orig',
+    brush: 48,
+    labelOn: false,
+    wmOn: false,
+    base: document.createElement('canvas'),
+    work: document.createElement('canvas'),
+    disp: $('#photoCanvas'),
+    strokes: [],
+    cur: null,
+    last: null,
+    colors: {},
+    baseData: null,
+    W: 0,
+    H: 0,
+    raf: 0
+  };
+  var bctx = photo.base.getContext('2d', { willReadFrequently: true });
+  var wctx = photo.work.getContext('2d');
+
+  function computeCrop(iw, ih, ratio) {
+    var rw, rh;
+    if (ratio === 'orig') { rw = iw; rh = ih; }
+    else {
+      var r = parseFloat(ratio);
+      if (iw / ih > r) { rh = ih; rw = ih * r; }
+      else { rw = iw; rh = iw / r; }
+    }
+    var maxSide = 1400;
+    var s = Math.min(1, maxSide / Math.max(rw, rh));
+    return {
+      sx: Math.round((iw - rw) / 2), sy: Math.round((ih - rh) / 2),
+      sw: Math.round(rw), sh: Math.round(rh),
+      dw: Math.max(1, Math.round(rw * s)), dh: Math.max(1, Math.round(rh * s))
+    };
+  }
+
+  function buildBase() {
+    if (!photo.img) return;
+    var c = computeCrop(photo.img.naturalWidth, photo.img.naturalHeight, photo.ratio);
+    photo.base.width = c.dw;
+    photo.base.height = c.dh;
+    bctx.clearRect(0, 0, c.dw, c.dh);
+    bctx.imageSmoothingQuality = 'high';
+    bctx.drawImage(photo.img, c.sx, c.sy, c.sw, c.sh, 0, 0, c.dw, c.dh);
+
+    photo.W = c.dw; photo.H = c.dh;
+    photo.work.width = c.dw; photo.work.height = c.dh;
+    photo.disp.width = c.dw; photo.disp.height = c.dh;
+
+    try { photo.baseData = bctx.getImageData(0, 0, c.dw, c.dh); }
+    catch (e) { photo.baseData = null; }
+    photo.strokes = [];
+    photo.cur = null;
+    photo.last = null;
+    photo.colors = {};
+    redrawWork();
+    updateUndo();
+    render();
+  }
+
+  function cellColor(cx, cy) {
+    var key = cx + ',' + cy;
+    if (photo.colors[key]) return photo.colors[key];
+    var d = photo.baseData.data, W = photo.W, H = photo.H;
+    var x0 = cx * CELL, y0 = cy * CELL;
+    var x1 = Math.min(x0 + CELL, W), y1 = Math.min(y0 + CELL, H);
+    var r = 0, g = 0, b = 0, n = 0, x, y, i;
+    for (y = y0; y < y1; y += 2) {
+      for (x = x0; x < x1; x += 2) {
+        i = (y * W + x) * 4;
+        r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+      }
+    }
+    if (!n) n = 1;
+    var col = 'rgb(' + Math.round(r / n) + ',' + Math.round(g / n) + ',' + Math.round(b / n) + ')';
+    photo.colors[key] = col;
+    return col;
+  }
+
+  function paintDab(x, y) {
+    if (!photo.baseData) return;
+    var rad = photo.brush / 2;
+    var c0x = Math.floor((x - rad) / CELL), c1x = Math.floor((x + rad) / CELL);
+    var c0y = Math.floor((y - rad) / CELL), c1y = Math.floor((y + rad) / CELL);
+    var maxcx = Math.floor((photo.W - 1) / CELL), maxcy = Math.floor((photo.H - 1) / CELL);
+    for (var cy = c0y; cy <= c1y; cy++) {
+      if (cy < 0 || cy > maxcy) continue;
+      for (var cx = c0x; cx <= c1x; cx++) {
+        if (cx < 0 || cx > maxcx) continue;
+        var px = cx * CELL + CELL / 2, py = cy * CELL + CELL / 2;
+        if (Math.hypot(px - x, py - y) > rad + CELL * 0.42) continue;
+        var key = cx + ',' + cy;
+        if (photo.cur.has(key)) continue;
+        photo.cur.add(key);
+        wctx.fillStyle = cellColor(cx, cy);
+        wctx.fillRect(cx * CELL, cy * CELL, CELL, CELL);
+      }
+    }
+  }
+
+  function pointFrom(e) {
+    var r = photo.disp.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left) * photo.disp.width / r.width,
+      y: (e.clientY - r.top) * photo.disp.height / r.height
+    };
+  }
+
+  function paintTo(p) {
+    if (!photo.cur) return;
+    if (photo.last) {
+      var dx = p.x - photo.last.x, dy = p.y - photo.last.y;
+      var dist = Math.hypot(dx, dy);
+      var steps = Math.max(1, Math.ceil(dist / (CELL * 0.55)));
+      for (var i = 1; i <= steps; i++) {
+        paintDab(photo.last.x + dx * i / steps, photo.last.y + dy * i / steps);
+      }
+    } else {
+      paintDab(p.x, p.y);
+    }
+    photo.last = p;
+    scheduleRender();
+    updateUndo();
+  }
+
+  function scheduleRender() {
+    if (photo.raf) return;
+    photo.raf = requestAnimationFrame(function () { photo.raf = 0; render(); });
+  }
+
+  function redrawWork() {
+    wctx.clearRect(0, 0, photo.W, photo.H);
+    wctx.drawImage(photo.base, 0, 0);
+    for (var s = 0; s < photo.strokes.length; s++) {
+      photo.strokes[s].forEach(function (key) {
+        var p = key.split(',');
+        wctx.fillStyle = cellColor(+p[0], +p[1]);
+        wctx.fillRect(+p[0] * CELL, +p[1] * CELL, CELL, CELL);
+      });
+    }
+  }
+
+  function fitFont(ctx, text, maxW, size, weight) {
+    var s = size;
+    do {
+      ctx.font = weight + ' ' + s + 'px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif';
+      if (ctx.measureText(text).width <= maxW) break;
+      s -= 1;
+    } while (s > 9);
+    return s;
+  }
+
+  function drawLabel(c, W, H) {
+    var gh = Math.round(H * 0.36);
+    var g = c.createLinearGradient(0, H - gh, 0, H);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(0.42, 'rgba(0,0,0,0.30)');
+    g.addColorStop(1, 'rgba(0,0,0,0.88)');
+    c.fillStyle = g;
+    c.fillRect(0, H - gh, W, gh);
+
+    var title = ($('#labelTitle').value || '오늘의 기록').trim();
+    var sub = ($('#labelSub').value || '').trim();
+    var padX = Math.round(W * 0.068);
+    var maxW = W - padX * 2;
+    var tSize = Math.round(Math.min(H * 0.070, W * 0.085));
+    var sSize = Math.round(Math.min(H * 0.036, W * 0.043));
+
+    c.textAlign = 'left';
+    c.textBaseline = 'alphabetic';
+    c.shadowColor = 'rgba(0,0,0,.5)';
+    c.shadowBlur = Math.max(2, H * 0.012);
+    c.shadowOffsetY = Math.max(1, H * 0.003);
+
+    var subBase = H - Math.round(H * 0.048);
+    var titleBase = sub ? H - Math.round(H * 0.098) : H - Math.round(H * 0.058);
+
+    var tFont = fitFont(c, title, maxW, tSize, '800');
+    c.fillStyle = '#ffffff';
+    c.fillText(title, padX, titleBase);
+
+    // 포인트 라인
+    c.shadowColor = 'transparent';
+    c.fillStyle = '#FF8A2B';
+    var barH = Math.max(3, Math.round(H * 0.008));
+    c.fillRect(padX, titleBase - tFont * 1.42, Math.max(18, W * 0.085), barH);
+
+    if (sub) {
+      c.shadowColor = 'rgba(0,0,0,.5)';
+      c.shadowBlur = Math.max(2, H * 0.010);
+      var sFont = fitFont(c, sub, maxW, sSize, '500');
+      c.fillStyle = 'rgba(255,255,255,.92)';
+      c.fillText(sub, padX, subBase);
+    }
+    c.shadowColor = 'transparent';
+    c.shadowBlur = 0;
+    c.shadowOffsetY = 0;
+  }
+
+  function drawWatermark(c, W, H) {
+    var fs = Math.max(13, Math.round(H * 0.034));
+    c.textAlign = 'right';
+    c.textBaseline = 'alphabetic';
+    c.font = '700 ' + fs + 'px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif';
+    c.globalAlpha = 0.62;
+    c.fillStyle = '#ffffff';
+    c.shadowColor = 'rgba(0,0,0,.38)';
+    c.shadowBlur = fs * 0.28;
+    c.fillText('나홍이', W - Math.round(W * 0.042), H - Math.round(H * 0.034));
+    c.shadowBlur = 0;
+    c.shadowColor = 'transparent';
+    c.globalAlpha = 1;
+  }
+
+  function render() {
+    if (!photo.img && !photo.W) return;
+    var c = photo.disp.getContext('2d');
+    c.clearRect(0, 0, photo.disp.width, photo.disp.height);
+    c.drawImage(photo.work, 0, 0);
+    if (photo.labelOn) drawLabel(c, photo.W, photo.H);
+    if (photo.wmOn) drawWatermark(c, photo.W, photo.H);
+  }
+
+  function updateUndo() {
+    $('#undoBtn').disabled = photo.strokes.length === 0;
+  }
+
+  // 파일 선택
+  $('#fileInput').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)) {
+      toast('이미지 파일만 열 수 있어요');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        photo.img = im;
+        photo.ratio = 'orig';
+        $$('#ratioSeg button').forEach(function (b) {
+          b.classList.toggle('active', b.getAttribute('data-ratio') === 'orig');
+        });
+        $('#canvasWrap').hidden = false;
+        $('#editor').hidden = false;
+        $('#picker').hidden = true;
+        $('#changePhoto').hidden = false;
+        $('#saveResult').hidden = true;
+        buildBase();
+        toast('사진을 불러왔어요 · 위치정보는 자동으로 빠져요');
+      };
+      im.onerror = function () { toast('이 이미지는 열 수 없어요'); };
+      im.src = reader.result;
+    };
+    reader.onerror = function () { toast('파일을 읽지 못했어요'); };
+    reader.readAsDataURL(f);
+  });
+
+  $('#changePhoto').addEventListener('click', function () { $('#fileInput').click(); });
+
+  // 비율
+  $$('#ratioSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      $$('#ratioSeg button').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      photo.ratio = b.getAttribute('data-ratio');
+      buildBase();
+      $('#saveResult').hidden = true;
+    });
+  });
+
+  // 브러시
+  $('#brush').addEventListener('input', function () {
+    photo.brush = +this.value;
+    $('#brushVal').textContent = String(photo.brush);
+  });
+
+  // 캔버스 그리기
+  photo.disp.addEventListener('pointerdown', function (e) {
+    if (!photo.img) return;
+    e.preventDefault();
+    try { photo.disp.setPointerCapture(e.pointerId); } catch (err) {}
+    photo.cur = new Set();
+    photo.strokes.push(photo.cur);
+    photo.last = null;
+    paintTo(pointFrom(e));
+  });
+  photo.disp.addEventListener('pointermove', function (e) {
+    if (!photo.cur) return;
+    e.preventDefault();
+    paintTo(pointFrom(e));
+  });
+  function endStroke() {
+    if (!photo.cur) return;
+    if (photo.cur.size === 0) photo.strokes.pop();
+    photo.cur = null;
+    photo.last = null;
+    updateUndo();
+    render();
+  }
+  photo.disp.addEventListener('pointerup', endStroke);
+  photo.disp.addEventListener('pointercancel', endStroke);
+  window.addEventListener('pointerup', endStroke);
+  window.addEventListener('blur', endStroke);
+  photo.disp.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  // 되돌리기 / 초기화
+  $('#undoBtn').addEventListener('click', function () {
+    if (!photo.strokes.length) return;
+    photo.strokes.pop();
+    redrawWork();
+    updateUndo();
+    render();
+    toast('한 번 되돌렸어요');
+  });
+  $('#resetMosaic').addEventListener('click', function () {
+    if (!photo.strokes.length) { toast('지울 모자이크가 없어요'); return; }
+    photo.strokes = [];
+    photo.cur = null;
+    redrawWork();
+    updateUndo();
+    render();
+    toast('모자이크를 모두 지웠어요');
+  });
+
+  // 라벨 / 워터마크 토글
+  function toggleSw(el, on) {
+    el.classList.toggle('on', on);
+    el.setAttribute('aria-checked', on ? 'true' : 'false');
+  }
+  $('#labelSw').addEventListener('click', function () {
+    photo.labelOn = !photo.labelOn;
+    toggleSw(this, photo.labelOn);
+    $('#labelFields').hidden = !photo.labelOn;
+    if (photo.img) render();
+  });
+  $('#wmSw').addEventListener('click', function () {
+    photo.wmOn = !photo.wmOn;
+    toggleSw(this, photo.wmOn);
+    if (photo.img) render();
+  });
+  ['#labelTitle', '#labelSub'].forEach(function (sel) {
+    $(sel).addEventListener('input', function () { if (photo.img) render(); });
+  });
+
+  // 저장
+  function stamp() {
+    var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '_' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  }
+  function savePhoto(kind) {
+    if (!photo.img) { toast('먼저 사진을 골라주세요'); return; }
+    render();
+    var url;
+    try {
+      url = kind === 'png' ? photo.disp.toDataURL('image/png') : photo.disp.toDataURL('image/jpeg', 0.92);
+    } catch (e) {
+      toast('저장에 실패했어요. 다른 사진으로 해보세요');
+      return;
+    }
+    var name = 'nahong_' + kind + '_' + stamp() + '.' + kind;
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    try { a.click(); } catch (e) {}
+    a.remove();
+
+    $('#savePreview').src = url;
+    $('#saveResult').hidden = false;
+    $('#saveMsg').innerHTML = '<b>' + kind.toUpperCase() + '</b> 이미지를 만들었어요.<br>' +
+      '안 열리면 위 미리보기를 길게 눌러 <b>사진에 저장</b>을 골라주세요. (위치정보 없이 저장돼요)';
+    toast(kind.toUpperCase() + ' 저장 준비 완료');
+  }
+  $('#saveJpg').addEventListener('click', function () { savePhoto('jpg'); });
+  $('#savePng').addEventListener('click', function () { savePhoto('png'); });
+
+  /* ================= TAB 2 : 청구사퀴즈 ================= */
+  var QUIZ = [
+    {
+      id: 'q1', tag: '치주', q: '만 52세 남성이 2026년 3월 2일 상악 우측 1/3악에 치주소파술을 받았다. 같은 부위에 ㉠ 3월 30일과 ㉡ 5월 6일 각각 치주소파술을 다시 시행했을 때, 산정으로 옳은 것은?',
+      choices: [
+        '㉠ 치주치료후처치(가) · ㉡ 치주소파술 50%',
+        '㉠ 치주소파술 50% · ㉡ 치주치료후처치(가)',
+        '㉠㉡ 모두 치주소파술 100%',
+        '㉠㉡ 모두 산정할 수 없다'
+      ],
+      answer: 0,
+      exp: '동일 부위 치주소파술을 1개월 이내 다시 시행하면 치주소파술이 아니라 치주치료후처치(가)로 산정합니다. 1개월을 넘고 3개월 이내라면 치주소파술 50%입니다.',
+      basis: '치주치료 산정지침'
+    },
+    {
+      id: 'q2', tag: '치주', q: '만 45세 여성이 2026년 2월 12일 치과의원에서 전악 치석제거(나)를 급여로 산정했다. 같은 해 11월 3일 다시 전악 치석제거를 원할 때 처리로 옳은 것은?',
+      choices: [
+        '연 1회를 넘었으므로 비급여로 하고, 그날 지각과민처치도 산정하지 않는다',
+        '급여로 한 번 더 산정할 수 있다',
+        '비급여로 하되 지각과민처치(나)는 함께 산정한다',
+        '상·하반기 각 1회씩 인정되므로 급여로 산정한다'
+      ],
+      answer: 0,
+      exp: '치석제거(나)는 1월 1일~12월 31일 기준 연 1회만 급여입니다. 초과분은 비급여이며, 비급여 치석제거를 한 당일에는 지각과민처치를 산정할 수 없습니다.',
+      basis: '차23-1 치석제거 산정지침'
+    },
+    {
+      id: 'q3', tag: '보존', q: '만 10세 남아의 하악 좌측 제1대구치에 2026년 3월 5일 치면열구전색술을 했다. 같은 기관에서 2026년 9월 17일 같은 치아에 재도포할 때 산정으로 옳은 것은?',
+      choices: [
+        '재진 진찰료만 산정한다',
+        '치면열구전색술 100%를 다시 산정한다',
+        '치면열구전색술 50%를 산정한다',
+        '초진 진찰료와 전색술을 함께 산정한다'
+      ],
+      answer: 0,
+      exp: '치면열구전색술은 만 18세 이하 제1·2대구치가 대상이고, 2년 이내 같은 치아에 다시 하면 재진 진찰료만 산정합니다. 2년이 지나면 급여로 다시 산정할 수 있습니다.',
+      basis: '치면열구전색술 산정지침'
+    },
+    {
+      id: 'q4', tag: '구강외과', q: '만 24세 여성의 하악 우측 제3대구치가 치관의 2/3 이상 치조골에 매복되어 있다. 발치와 같은 날 같은 부위에 치조골성형수술을 시행했을 때 산정으로 옳은 것은?',
+      choices: [
+        '완전매복치발치 100% + 치조골성형수술 50%',
+        '완전매복치발치와 Burr(가)·봉합사만 산정한다',
+        '복잡매복치발치 100% + 치조골성형수술 100%',
+        '완전매복치발치 100% + 치조골성형수술 100%'
+      ],
+      answer: 1,
+      exp: '치관 2/3 이상 매복은 완전매복치, 2/3 미만은 복잡매복치입니다. 매복치 발치와 치조골성형수술은 일련의 과정이라 함께 산정할 수 없고, Burr(가)와 봉합사는 따로 산정합니다.',
+      basis: '처치·수술료 산정지침'
+    },
+    {
+      id: 'q5', tag: '구강외과', q: '만 7세 남아의 상악 우측 제2유구치를 치근분리한 뒤 발치했다. 산정으로 옳은 것은?',
+      choices: [
+        '유치발치 1치로 산정한다',
+        '난발치 1치 + Burr(가)를 산정한다',
+        '복잡매복치발치 1치로 산정한다',
+        '치근분리술과 유치발치를 각각 산정한다'
+      ],
+      answer: 1,
+      exp: '유치를 치근분리해 발치하면 유치발치가 아니라 난발치로 산정합니다. 치아분리술에 사용한 Burr(가)는 별도 산정하고 내역을 남깁니다.',
+      basis: '발치료 산정지침'
+    },
+    {
+      id: 'q6', tag: '임플란트', q: '만 68세 여성이 부분무치악으로 급여 치과임플란트 3단계 보철수복을 받는다. 급여로 인정되는 보철물로 옳은 것은?',
+      choices: [
+        '귀금속도재관',
+        '비귀금속도재관(PFM) 또는 지르코니아 크라운',
+        '완전무치악 일체형 임플란트 보철',
+        '어태치먼트를 이용한 국소의치'
+      ],
+      answer: 1,
+      exp: '2025년 2월 1일부터 노인 임플란트 급여 보철물이 비귀금속도재관(PFM)과 지르코니아 크라운으로 확대됐습니다. 완전무치악과 일체형은 급여 대상이 아닙니다.',
+      basis: '보건복지부 고시 제2025-23호'
+    },
+    {
+      id: 'q7', tag: '근관', q: '만 41세 남성의 하악 좌측 제1대구치에 6월 2일 근관치료를 시작했고, 6월 9일 예후가 불량해 같은 치아를 발치했다. 산정으로 옳은 것은?',
+      choices: [
+        '이전 근관치료는 취소하고 발치만 산정한다',
+        '이전 근관치료와 발치를 각각 100% 산정한다',
+        '이전 근관치료 50% + 발치 100%로 산정한다',
+        '발치 50%만 산정한다'
+      ],
+      answer: 1,
+      exp: '근관치료 도중 다른 날 예후가 불량해 발치하면, 이미 시행한 근관치료와 발치를 각각 100% 인정합니다. 같은 날 발치했다면 조정될 수 있습니다.',
+      basis: '근관치료 산정지침'
+    },
+    {
+      id: 'q8', tag: '치주', q: '만 38세 남성이 급성 치주염으로 초진 내원해 전처치 없이 같은 날 상악 우측 1/3악 치근활택술을 시행했다. 산정으로 옳은 것은?',
+      choices: [
+        '전처치가 없었으므로 산정할 수 없다',
+        '치근활택술 100%로 산정할 수 있다',
+        '치근활택술 50%만 산정한다',
+        '치석제거(가)로 바꿔 산정한다'
+      ],
+      answer: 1,
+      exp: '급성 치주염 상병에서는 전처치 없이 초진 당일 시행한 치근활택술도 100% 산정됩니다. 치주소파술은 전처치와 마취가 필요해 같은 상황이면 치근활택술로 조정될 수 있습니다.',
+      basis: '치주치료 산정지침'
+    },
+    {
+      id: 'q9', tag: '본인부담', q: '만 67세 여성이 치과의원 외래에서 요양급여비용 총액 23,000원의 진료를 받았다. 본인부담금으로 옳은 것은?',
+      choices: ['1,500원', '2,300원', '4,600원', '6,900원'],
+      answer: 2,
+      exp: '노인외래정액제는 15,000원 이하 1,500원, 15,000원 초과~20,000원 이하 10%, 20,000원 초과~25,000원 이하 20%, 25,000원 초과 30%입니다. 23,000원의 20%는 4,600원입니다.',
+      basis: '국민건강보험법 시행규칙 별표 3'
+    },
+    {
+      id: 'q10', tag: '턱관절', q: '만 29세 여성이 측두하악관절장애로 턱관절 측두하악관절자극요법을 받으려 한다. 산정으로 옳은 것은?',
+      choices: [
+        '분석검사 없이 바로 산정할 수 있다',
+        '분석검사를 먼저 시행해야 산정할 수 있다',
+        '악관절탈구 비관혈적 정복술을 함께 해야 산정된다',
+        '치과의원에서는 산정할 수 없다'
+      ],
+      answer: 1,
+      exp: '측두하악관절자극요법은 분석검사를 먼저 시행해야 산정할 수 있습니다. 반면 분사신장치료와 악관절탈구 비관혈적 정복술은 인증이나 분석검사 없이 산정 가능합니다.',
+      basis: '턱관절 치료 산정지침'
+    },
+    {
+      id: 'q11', tag: '마취', q: '만 33세 남성의 하악 좌측 제1대구치 발치를 위해 하치조신경 전달마취를 했는데 통증이 남아 같은 부위에 침윤마취를 추가했다. 마취료 산정으로 옳은 것은?',
+      choices: [
+        '전달마취 1/2악 + 침윤마취 1/3악을 각각 산정한다',
+        '전달마취 1/2악만 산정한다',
+        '침윤마취 1/3악만 산정한다',
+        '같은 부위이므로 마취료를 산정할 수 없다'
+      ],
+      answer: 1,
+      exp: '같은 목적·같은 부위에 침윤마취와 전달마취를 함께 하면 주된 마취만 산정합니다. 전달마취는 1/2악당, 침윤마취는 1/3악당입니다.',
+      basis: '마취료 산정지침'
+    },
+    {
+      id: 'q12', tag: '진찰료', q: '만 35세 여성이 2026년 5월 4일(월) 치과의원에서 충치 치료를 마쳤다. 5월 30일(토) 오전 10시 같은 상병이 재발해 다시 내원했을 때 진찰료 산정으로 옳은 것은?',
+      choices: [
+        '초진 진찰료 + 토요가산',
+        '재진 진찰료 + 토요가산',
+        '재진 진찰료만',
+        '초진 진찰료만'
+      ],
+      answer: 1,
+      exp: '치료가 끝난 뒤 30일 이내 같은 상병이 재발하면 재진입니다. 토요일 09~13시 정규진료는 기본진찰료의 30%를 가산하며, 야간·공휴 가산과는 중복되지 않습니다.',
+      basis: '진찰료 산정지침'
+    },
+    {
+      id: 'q13', tag: '방사선', q: '만 4세 여아가 치과의원에서 파노라마를 촬영하고, 진단이 불확실해 같은 날 CBCT도 촬영했다. 산정으로 옳은 것은?',
+      choices: [
+        '파노라마 15%, CBCT 20%의 소아가산을 각각 적용한다',
+        '소아가산은 나이와 상관없이 30% 하나만 적용한다',
+        'CBCT는 일반영상 없이도 먼저 촬영할 수 있다',
+        '소아가산은 일반영상에만 적용된다'
+      ],
+      answer: 0,
+      exp: '만 6세 미만 소아가산은 일반영상 15%, 특수영상(CBCT) 20%입니다. CBCT는 일반영상으로 진단이 불확실할 때 촬영하고, 판독기록이 있어야 판독료가 인정됩니다.',
+      basis: '방사선 촬영 산정지침'
+    },
+    {
+      id: 'q14', tag: '보존', q: '만 8세 남아의 상악 우측 제1대구치에 치수병변이 없는 우식으로 광중합형 복합레진 충전을 했다. 산정으로 옳은 것은?',
+      choices: [
+        '대상 연령이 아니므로 비급여로 처리한다',
+        '급여이며, 와동형성·러버댐·접착 처치는 레진 수가에 포함된다',
+        '급여이며, 와동형성과 러버댐을 각각 더 산정한다',
+        '유치가 아니므로 급여 대상이 아니다'
+      ],
+      answer: 1,
+      exp: '광중합형 복합레진은 만 5세 이상~만 12세 이하 영구치(제3대구치 제외) 우식이 급여 대상입니다. 와동형성·러버댐·접착 전 처치는 수가에 포함되어 따로 산정할 수 없습니다.',
+      basis: '보존치료 산정지침'
+    },
+    {
+      id: 'q15', tag: '틀니', q: '만 70세 남성이 급여 완전틀니를 최종 장착한 지 5개월 됐고, 잇몸 흡수로 첨상(직접법)이 필요하다. 산정으로 옳은 것은?',
+      choices: [
+        '3개월 6회 무상기간이 지났으므로 첨상 직접법을 연 1회 범위에서 본인부담 30%로 산정한다',
+        '3개월이 지나면 7년 동안 유지관리를 모두 무상으로 한다',
+        '첨상은 비급여이므로 전액 본인부담이다',
+        '첨상은 급여틀니 재제작(7년 1회) 때만 산정한다'
+      ],
+      answer: 0,
+      exp: '최종 장착 후 3개월 이내 6회까지는 시술료 없이 진찰료만 냅니다. 그 뒤에는 첨상(첨상 직접법) 연 1회처럼 항목별 횟수 안에서 본인부담 30%로 산정합니다.',
+      basis: '틀니 유지관리행위 급여기준'
+    }
+  ];
+
+  var QUIZ_KEY = 'nahong_quiz_v1';
+  var quizState = { mode: 'all', idx: 0, answers: store.get(QUIZ_KEY, {}).answers || {}, finished: false };
+
+  function saveQuiz() { store.set(QUIZ_KEY, { answers: quizState.answers }); }
+  function byId(id) { for (var i = 0; i < QUIZ.length; i++) if (QUIZ[i].id === id) return QUIZ[i]; return null; }
+  function isWrong(q) {
+    var a = quizState.answers[q.id];
+    return a !== undefined && a !== q.answer;
+  }
+  function wrongList() { return QUIZ.filter(isWrong); }
+  function orderIds() {
+    if (quizState.mode === 'wrong') return wrongList().map(function (q) { return q.id; });
+    return QUIZ.map(function (q) { return q.id; });
+  }
+
+  function renderQuiz() {
+    var ids = orderIds();
+    var wrong = wrongList();
+    $('#wrongCount').textContent = String(wrong.length);
+    if (quizState.mode === 'wrong' && ids.length === 0) quizState.mode = 'all';
+    if (quizState.mode === 'all') ids = orderIds();
+
+    var answered = 0, correct = 0;
+    ids.forEach(function (id) {
+      var q = byId(id);
+      if (quizState.answers[id] !== undefined) {
+        answered++;
+        if (quizState.answers[id] === q.answer) correct++;
+      }
+    });
+    $('#qStat').innerHTML = '정답 <b>' + correct + '</b> · 오답 <b>' + (answered - correct) + '</b>';
+    $('#qAcc').textContent = answered ? '정답률 ' + Math.round(correct / answered * 100) + '%' : '정답률 -';
+    $$('#quizMode button').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-mode') === quizState.mode);
+    });
+
+    var body = $('#quizBody');
+    var nav = $('#quizNav');
+
+    if (quizState.finished) {
+      nav.hidden = true;
+      $('#qBar').style.width = '100%';
+      var allAnswered = QUIZ.filter(function (q) { return quizState.answers[q.id] !== undefined; }).length;
+      var allCorrect = QUIZ.filter(function (q) { return quizState.answers[q.id] === q.answer; }).length;
+      var acc = allAnswered ? Math.round(allCorrect / allAnswered * 100) : 0;
+      body.innerHTML =
+        '<div class="card result">' +
+        '<div class="face">' + (acc >= 80 ? '🍊' : acc >= 60 ? '🦷' : '💪') + '</div>' +
+        '<div class="score">15문제 중 <b>' + allCorrect + '</b>문제 정답</div>' +
+        '<div class="acc">푼 문제 ' + allAnswered + '개 · 정답률 ' + acc + '%</div>' +
+        '<p class="hint" style="margin-top:8px;">틀린 문제는 오답노트에 저장해 뒀어요. 다시 풀면 바로 확인할 수 있어요.</p>' +
+        '<div class="row">' +
+        '<button class="btn ghost" id="resWrong"' + (wrong.length ? '' : ' disabled') + '>틀린 문제 ' + wrong.length + '개</button>' +
+        '<button class="btn" id="resAll">전체 다시 풀기</button>' +
+        '</div></div>';
+      var rw = $('#resWrong');
+      if (rw) rw.addEventListener('click', function () {
+        if (!wrong.length) return;
+        quizState.mode = 'wrong';
+        quizState.finished = false;
+        quizState.idx = 0;
+        renderQuiz();
+      });
+      $('#resAll').addEventListener('click', function () {
+        if (!window.confirm('기록을 지우고 15문제를 처음부터 풀까요?')) return;
+        quizState.answers = {};
+        saveQuiz();
+        quizState.mode = 'all';
+        quizState.finished = false;
+        quizState.idx = 0;
+        renderQuiz();
+        toast('기록을 지우고 처음부터 시작해요');
+      });
+      return;
+    }
+
+    nav.hidden = false;
+    if (quizState.idx >= ids.length) quizState.idx = Math.max(0, ids.length - 1);
+    var q = byId(ids[quizState.idx]);
+    var chosen = quizState.answers[q.id];
+    var isAnswered = chosen !== undefined;
+    var pct = Math.round((quizState.idx + 1) / ids.length * 100);
+    $('#qBar').style.width = pct + '%';
+    $('#qPrev').disabled = quizState.idx === 0;
+    $('#qNext').textContent = quizState.idx === ids.length - 1 ? '결과 보기' : '다음 →';
+
+    var labels = ['①', '②', '③', '④'];
+    var html =
+      '<div class="card">' +
+      '<div class="qmeta"><span class="qtag">' + q.tag + '</span>' +
+      '<span class="qnum">' + (quizState.idx + 1) + ' / ' + ids.length + '</span></div>' +
+      '<p class="qtext">' + q.q + '</p>';
+
+    q.choices.forEach(function (c, i) {
+      var cls = 'choice';
+      if (isAnswered) {
+        if (i === q.answer) cls += ' correct';
+        else if (i === chosen) cls += ' wrong';
+        else cls += ' dim';
+      }
+      html += '<button class="' + cls + '" data-pick="' + i + '"' + (isAnswered ? ' disabled' : '') + '>' +
+        '<span class="num">' + labels[i] + '</span><span>' + c + '</span></button>';
+    });
+
+    html += '<div class="exp' + (isAnswered ? ' on' : '') + '" id="expBox">';
+    if (isAnswered) {
+      var ok = chosen === q.answer;
+      html += '<div class="res ' + (ok ? 'ok' : 'no') + '">' +
+        (ok ? '정답이에요 🧡' : '아쉬워요 · 정답은 ' + labels[q.answer]) + '</div>' +
+        '<p>' + q.exp + '</p><div class="basis">근거 · ' + q.basis + '</div>';
+    }
+    html += '</div></div>';
+    body.innerHTML = html;
+
+    $$('#quizBody .choice').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (quizState.answers[q.id] !== undefined) return;
+        quizState.answers[q.id] = +btn.getAttribute('data-pick');
+        saveQuiz();
+        renderQuiz();
+        var e = $('#expBox');
+        if (e) e.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    });
+  }
+
+  $('#qPrev').addEventListener('click', function () {
+    if (quizState.idx > 0) { quizState.idx--; renderQuiz(); }
+  });
+  $('#qNext').addEventListener('click', function () {
+    var ids = orderIds();
+    if (quizState.idx >= ids.length - 1) {
+      quizState.finished = true;
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    quizState.idx++;
+    renderQuiz();
+  });
+  $$('#quizMode button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var mode = b.getAttribute('data-mode');
+      if (mode === 'wrong' && wrongList().length === 0) {
+        toast('틀린 문제가 없어요! 전체 문제로 볼게요');
+        mode = 'all';
+      }
+      quizState.mode = mode;
+      quizState.idx = 0;
+      quizState.finished = false;
+      renderQuiz();
+    });
+  });
+  $('#qReset').addEventListener('click', function () {
+    if (!window.confirm('퀴즈 기록(정답·오답)을 모두 지울까요?')) return;
+    quizState.answers = {};
+    quizState.mode = 'all';
+    quizState.idx = 0;
+    quizState.finished = false;
+    saveQuiz();
+    renderQuiz();
+    toast('퀴즈 기록을 지웠어요');
+  });
+
+  /* ================= TAB 3 : 일정·계산 ================= */
+  var TODO_KEY = 'nahong_todo_v1';
+  var todoItems = store.get(TODO_KEY, null);
+  if (!Array.isArray(todoItems)) {
+    todoItems = [{ id: 'sample', title: '예시) 체험단 방문', date: '', memo: '× 눌러 지우고 내 일정을 적어보세요', done: false }];
+    store.set(TODO_KEY, todoItems);
+  }
+
+  function saveTodo() { store.set(TODO_KEY, todoItems); }
+
+  function ddayOf(dateStr) {
+    if (!dateStr) return null;
+    var t = new Date(); t.setHours(0, 0, 0, 0);
+    var d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return null;
+    var diff = Math.round((d - t) / 86400000);
+    if (diff === 0) return { t: 'D-DAY', cls: 'today' };
+    if (diff > 0) return { t: 'D-' + diff, cls: '' };
+    return { t: 'D+' + (-diff), cls: 'over' };
+  }
+  function dateLabel(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return '';
+    var w = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
+    return (d.getMonth() + 1) + '/' + d.getDate() + ' (' + w + ')';
+  }
+
+  function renderTodo() {
+    var list = $('#todoList');
+    var items = todoItems.slice().sort(function (a, b) {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date < b.date ? -1 : 1;
+    });
+    if (!items.length) {
+      list.innerHTML = '<div class="emptystate"><span class="face">🧺</span>아직 등록한 일정이 없어요.<br>아래에 추가해 보세요!</div>';
+      $('#todoCount').textContent = '0개';
+      return;
+    }
+    var open = items.filter(function (i) { return !i.done; }).length;
+    $('#todoCount').textContent = open + '개 남음';
+    list.innerHTML = items.map(function (it) {
+      var dd = ddayOf(it.date);
+      return '<div class="item' + (it.done ? ' done' : '') + '" data-id="' + it.id + '">' +
+        '<button class="cb' + (it.done ? ' on' : '') + '" data-act="toggle" aria-label="완료 체크">✓</button>' +
+        '<div class="body"><div class="title">' + escapeHtml(it.title) + '</div>' +
+        '<div class="meta">' +
+        (it.date ? '<span class="date">' + dateLabel(it.date) + '</span>' : '') +
+        (dd ? '<span class="dday ' + dd.cls + '">' + dd.t + '</span>' : '') +
+        '</div>' +
+        (it.memo ? '<div class="memo">' + escapeHtml(it.memo) + '</div>' : '') +
+        '</div>' +
+        '<button class="del" data-act="del" aria-label="삭제">×</button>' +
+        '</div>';
+    }).join('');
+
+    $$('#todoList .item').forEach(function (row) {
+      var id = row.getAttribute('data-id');
+      row.querySelector('[data-act="toggle"]').addEventListener('click', function () {
+        var it = todoItems.find(function (x) { return x.id === id; });
+        if (!it) return;
+        it.done = !it.done;
+        saveTodo();
+        renderTodo();
+      });
+      row.querySelector('[data-act="del"]').addEventListener('click', function () {
+        if (!window.confirm('이 일정을 지울까요?')) return;
+        todoItems = todoItems.filter(function (x) { return x.id !== id; });
+        saveTodo();
+        renderTodo();
+        toast('지웠어요');
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+
+  $('#todoAdd').addEventListener('click', addTodo);
+  $('#todoMemo').addEventListener('keydown', function (e) { if (e.key === 'Enter') addTodo(); });
+  function addTodo() {
+    var title = $('#todoTitle').value.trim();
+    if (!title) { toast('할 일을 적어주세요'); $('#todoTitle').focus(); return; }
+    todoItems.push({
+      id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      title: title,
+      date: $('#todoDate').value || '',
+      memo: $('#todoMemo').value.trim(),
+      done: false
+    });
+    saveTodo();
+    $('#todoTitle').value = '';
+    $('#todoDate').value = '';
+    $('#todoMemo').value = '';
+    renderTodo();
+    toast('일정에 추가했어요');
+  }
+
+  // 계산기
+  var calc = store.get('nahong_calc_v1', { daily: 66048, days: 180 });
+  function renderCalc() {
+    var daily = calc.daily || 0;
+    var days = calc.days || 0;
+    var total = daily * days;
+    $('#dailyPay').value = daily ? fmt(daily) : '';
+    $('#calcTotal').textContent = fmt(total) + '원';
+    $('#calcMonth').textContent = fmt(daily * 30) + '원';
+    $('#calcLine').textContent = '1일 ' + fmt(daily) + '원 × ' + days + '일';
+    $$('#daysChips .chip').forEach(function (b) {
+      b.classList.toggle('on', +b.getAttribute('data-days') === days);
+    });
+    $$('.chips .chip[data-pay]').forEach(function (b) {
+      b.classList.toggle('on', +b.getAttribute('data-pay') === daily);
+    });
+    store.set('nahong_calc_v1', calc);
+  }
+  $('#dailyPay').addEventListener('input', function () {
+    var v = this.value.replace(/[^\d]/g, '');
+    var n = v ? parseInt(v, 10) : 0;
+    this.value = v ? fmt(n) : '';
+    calc.daily = n;
+    renderCalc();
+  });
+  $$('.chips .chip[data-pay]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      calc.daily = +b.getAttribute('data-pay');
+      renderCalc();
+      toast(b.textContent.trim() + '을 넣었어요');
+    });
+  });
+  $$('#daysChips .chip').forEach(function (b) {
+    b.addEventListener('click', function () {
+      calc.days = +b.getAttribute('data-days');
+      renderCalc();
+    });
+  });
+
+  // 체크리스트
+  var CHECK_KEY = 'nahong_check_v1';
+  var CHECKS = [
+    { id: 'c1', t: '이직확인서 처리 확인', d: '사업주 신고 여부와 상실코드(계약만료 등)가 맞는지 확인' },
+    { id: 'c2', t: '고용24 구직신청', d: '실업급여 수급의 전제 · 온라인으로 신청 가능' },
+    { id: 'c3', t: '실업급여 수급자격 신청', d: '이직일 다음 날부터 12개월 안에 관할 고용센터에 신청' },
+    { id: 'c4', t: '건강보험 피부양자 등록', d: '직장가입자 가족 밑으로 등록하면 보험료를 아낄 수 있어요' },
+    { id: 'c5', t: '연차미사용수당 정산', d: '퇴직 전 남은 연차 일수와 지급 여부 확인' },
+    { id: 'c6', t: '퇴직연금(IRP) 정산', d: 'DC형·IRP 계좌로 이전하고 운용 상태 확인' }
+  ];
+  var checkDone = store.get(CHECK_KEY, {});
+  function renderChecks() {
+    var done = CHECKS.filter(function (c) { return checkDone[c.id]; }).length;
+    $('#checkCount').textContent = done + ' / ' + CHECKS.length;
+    $('#checkList').innerHTML = CHECKS.map(function (c) {
+      var on = !!checkDone[c.id];
+      return '<div class="item" data-id="' + c.id + '">' +
+        '<button class="cb' + (on ? ' on' : '') + '" data-act="check" aria-label="' + escapeHtml(c.t) + ' 체크">✓</button>' +
+        '<div class="body"><div class="title" style="' + (on ? 'color:#B49C8C;text-decoration:line-through;' : '') + '">' + c.t + '</div>' +
+        '<div class="desc">' + c.d + '</div></div></div>';
+    }).join('');
+    $$('#checkList .cb').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var row = b.closest('.item');
+        var id = row.getAttribute('data-id');
+        checkDone[id] = !checkDone[id];
+        if (!checkDone[id]) delete checkDone[id];
+        store.set(CHECK_KEY, checkDone);
+        renderChecks();
+      });
+    });
+  }
+
+  /* ================= 초기화 ================= */
+  renderQuiz();
+  renderTodo();
+  renderCalc();
+  renderChecks();
+  updateUndo();
+})();
+</script>
+</body>
+</html>
