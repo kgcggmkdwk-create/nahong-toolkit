@@ -306,7 +306,7 @@
       <div class="card">
         <div class="head"><h2>🦷 청구사 3급 실전</h2></div>
         <div class="seg" id="quizMode" style="margin-top:2px;">
-          <button data-mode="all" class="active">전체 15문제</button>
+          <button data-mode="all" class="active">전체 <span id="allCount">19</span>문제</button>
           <button data-mode="wrong">틀린 문제 <span id="wrongCount">0</span></button>
         </div>
         <div class="quiz-stats">
@@ -1087,6 +1087,7 @@
     });
     $('#qStat').innerHTML = '정답 <b>' + correct + '</b> · 오답 <b>' + (answered - correct) + '</b>';
     $('#qAcc').textContent = answered ? '정답률 ' + Math.round(correct / answered * 100) + '%' : '정답률 -';
+    $('#allCount').textContent = String(QUIZ.length);
     $$('#quizMode button').forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-mode') === quizState.mode);
     });
