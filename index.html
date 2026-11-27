@@ -204,6 +204,55 @@
   .foot{font-size:11px;color:#B09884;text-align:center;line-height:1.6;padding:4px 10px 2px;letter-spacing:-.2px;}
   .foot b{color:#8A6A55;}
 
+  /* ---------- clip studio ---------- */
+  .stage-wrap{
+    position:relative;width:min(100%,calc(52vh * 9 / 16));aspect-ratio:9 / 16;margin:11px auto 0;
+    background:#1C1512;border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(90,55,30,.18);
+  }
+  #stage{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;}
+  .stage-empty{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;color:#9A8577;font-size:12px;text-align:center;line-height:1.6;pointer-events:none;letter-spacing:-.2px;
+  }
+  .stage-empty span{font-size:30px;}
+  .cut{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .cut:last-child{border-bottom:0;padding-bottom:0;}
+  .cut-thumb{
+    width:44px;height:58px;flex:none;border-radius:10px;background:#2A1E17;overflow:hidden;
+    display:grid;place-items:center;color:#C8B4A4;font-size:17px;
+  }
+  .cut-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .cut-body{flex:1;min-width:0;}
+  .cut-name{font-size:12.5px;font-weight:800;letter-spacing:-.3px;}
+  .cut-sub{font-size:10.5px;color:#A98D7B;margin-top:1px;}
+  .trim{display:flex;align-items:center;gap:6px;margin-top:3px;}
+  .trim > span{font-size:10.5px;color:#8A6A55;font-weight:700;flex:none;width:15px;}
+  .trim > b{font-size:10.5px;color:#C2551A;font-weight:800;flex:none;width:34px;text-align:right;}
+  .trim input[type=range]{height:26px;flex:1;min-width:0;}
+  .cut-tools{display:flex;flex-direction:column;gap:4px;flex:none;}
+  .cut-tools button{
+    width:32px;height:28px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#8A6A55;
+    font-size:11px;font-family:inherit;line-height:1;cursor:pointer;
+  }
+  .mini-field{flex:1;min-width:0;}
+  .mini-field > span{font-size:10.5px;color:#8A6A55;font-weight:700;display:block;margin-bottom:3px;}
+  .mini-field input[type=number]{
+    width:100%;border:1px solid var(--line);background:#FFFCF8;border-radius:11px;padding:0 10px;height:40px;
+    font-size:14px;font-family:inherit;font-weight:700;color:var(--ink);
+  }
+  .mini-field input[type=color]{
+    width:100%;height:40px;border:1px solid var(--line);border-radius:11px;background:#FFFCF8;padding:3px;display:block;
+  }
+  .stk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px;}
+  .stk-grid button{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border:1.5px solid #F0DCCA;background:#fff;border-radius:13px;padding:7px 2px;font-family:inherit;
+    font-size:11px;font-weight:700;color:#8A6A55;min-height:60px;letter-spacing:-.3px;cursor:pointer;
+  }
+  .stk-grid button span{font-size:22px;line-height:1.1;}
+  .stk-grid button:active{border-color:#FFC79B;background:var(--orange-soft);}
+  .chip-note{font-size:11.5px;color:var(--muted);line-height:1.5;}
+
   #toast{
     position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translate(-50%,14px);
     background:rgba(59,43,33,.94);color:#fff;font-size:12.5px;font-weight:600;padding:10px 16px;border-radius:999px;
@@ -384,12 +433,132 @@
       </div>
       <p class="foot">입력한 내용은 이 폰 브라우저에만 저장돼요. Safari 공유 → <b>홈 화면에 추가</b>를 하면 앱처럼 열려요.</p>
     </section>
+
+    <!-- ============ TAB 4 : 클립 스튜디오 ============ -->
+    <section class="tab" id="tab-clip">
+      <div class="card">
+        <div class="head"><h2>🎬 9:16 미리보기</h2><span class="hint" id="clipClock" style="margin:0;font-weight:800;color:#C2551A;">0.0 / 0.0초</span></div>
+        <div class="stage-wrap" id="stageWrap">
+          <canvas id="stage"></canvas>
+          <div class="stage-empty" id="stageEmpty"><span>🎞️</span>아래에서 영상·사진을 추가하면<br>여기에 9:16으로 보여요</div>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn" id="clipPlay" style="flex:2;">▶ 재생</button>
+          <button class="btn ghost" id="clipRewind">⏮ 처음</button>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <button class="btn ghost small" id="clipLoop">🔁 반복 켜짐</button>
+          <button class="btn ghost small" id="clipReset">🧹 전부 지우기</button>
+        </div>
+        <input type="range" id="clipSeek" min="0" max="1000" step="1" value="0" aria-label="재생 위치">
+        <p class="hint">미리보기에서 <b>자막·스티커를 손가락으로 끌어</b> 위치를 옮겨요. 선택한 건 점선 테두리로 표시돼요.</p>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>1️⃣ 컷 (영상·사진)</h2><span class="hint" style="margin:0;font-weight:700;" id="cutSummary">0컷</span></div>
+        <label class="picker" for="clipFile" style="padding:16px 12px;">
+          <span class="big">📹</span><strong>영상·사진 추가</strong><span>mp4·mov·jpg·png · 여러 개 한 번에</span>
+        </label>
+        <input type="file" id="clipFile" accept="video/*,image/*" multiple hidden>
+        <div class="seg" id="fitSeg" style="margin-top:9px;">
+          <button data-fit="cover" class="active">화면 채우기</button>
+          <button data-fit="contain">원본 다 보이게</button>
+        </div>
+        <div id="cutList"></div>
+        <p class="hint">영상은 담으면 <b>기본 15초까지만</b> 쓰고, ‘뒤’ 슬라이더로 늘릴 수 있어요. 사진은 2.5초 컷이에요.</p>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>2️⃣ 자막</h2><button class="btn small line" id="addCaption" style="flex:none;">+ 자막</button></div>
+        <div class="chips" id="capChips" style="margin-top:2px;"></div>
+        <div id="capEditor" hidden>
+          <input type="text" id="capText" maxlength="60" placeholder="자막 내용" style="margin-top:9px;">
+          <div class="row" style="margin-top:7px;">
+            <div class="mini-field"><span>시작(초)</span><input type="number" id="capStart" min="0" step="0.1" inputmode="decimal"></div>
+            <div class="mini-field"><span>끝(초)</span><input type="number" id="capEnd" min="0" step="0.1" inputmode="decimal"></div>
+          </div>
+          <div class="field-row"><label for="capSize">크기</label><span class="hint" id="capSizeVal" style="margin:0;font-weight:700;color:#C2551A;">54</span></div>
+          <input type="range" id="capSize" min="22" max="110" step="1" value="54">
+          <div class="row" style="margin-top:8px;">
+            <div class="mini-field"><span>글자색</span><input type="color" id="capColor" value="#FFFFFF"></div>
+            <div class="mini-field"><span>외곽선</span><input type="color" id="capStroke" value="#3B2B21"></div>
+            <div class="mini-field"><span>배경</span><input type="color" id="capBg" value="#FF7A1A"></div>
+          </div>
+          <div class="field-row" style="margin-top:8px;">
+            <label>배경 깔기</label>
+            <button class="sw on" id="capBgSw" role="switch" aria-checked="true" aria-label="자막 배경"></button>
+          </div>
+          <div class="field-row">
+            <label>외곽선</label>
+            <button class="sw on" id="capStrokeSw" role="switch" aria-checked="true" aria-label="자막 외곽선"></button>
+          </div>
+          <div class="hint" style="margin-top:9px;">폰트</div>
+          <div class="chips" id="capFontChips">
+            <button class="chip on" data-font="gothic">고딕</button>
+            <button class="chip" data-font="myungjo">명조</button>
+            <button class="chip" data-font="round">둥근체</button>
+            <button class="chip" data-font="pen">손글씨</button>
+          </div>
+          <button class="btn ghost small full" id="capDel" style="margin-top:11px;">이 자막 삭제</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>3️⃣ 스티커</h2><span class="hint" style="margin:0;">눌러서 추가</span></div>
+        <div class="stk-grid" id="stkGrid"></div>
+        <label class="btn ghost full" for="stickerFile" style="margin-top:9px;">🖼️ 내 PNG·JPG 이미지 올리기</label>
+        <input type="file" id="stickerFile" accept="image/png,image/jpeg" hidden>
+        <div class="chips" id="stkChips" style="margin-top:10px;"></div>
+        <div id="stkEditor" hidden>
+          <div class="field-row"><label for="stkSize">크기</label><span class="hint" id="stkSizeVal" style="margin:0;font-weight:700;color:#C2551A;">30%</span></div>
+          <input type="range" id="stkSize" min="6" max="140" step="1" value="30">
+          <div class="field-row"><label for="stkRot">회전</label><span class="hint" id="stkRotVal" style="margin:0;font-weight:700;color:#C2551A;">0°</span></div>
+          <input type="range" id="stkRot" min="-180" max="180" step="1" value="0">
+          <div class="row" style="margin-top:7px;">
+            <div class="mini-field"><span>시작(초)</span><input type="number" id="stkStart" min="0" step="0.1" inputmode="decimal"></div>
+            <div class="mini-field"><span>끝(초)</span><input type="number" id="stkEnd" min="0" step="0.1" inputmode="decimal"></div>
+          </div>
+          <button class="btn ghost small full" id="stkDel" style="margin-top:11px;">이 스티커 삭제</button>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn ghost small" id="stkCenter">가운데로</button>
+          <button class="btn ghost small" id="stkFront">맨 앞으로</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>4️⃣ 저장</h2></div>
+        <div class="hint">GIF 길이</div>
+        <div class="seg" id="gifLenSeg">
+          <button data-len="3">3초</button>
+          <button data-len="5" class="active">5초</button>
+          <button data-len="8">8초</button>
+          <button data-len="99">끝까지</button>
+        </div>
+        <div class="hint" style="margin-top:10px;">GIF 시작 위치</div>
+        <div class="seg" id="gifFromSeg">
+          <button data-from="start" class="active">처음부터</button>
+          <button data-from="now">지금 위치부터</button>
+        </div>
+        <button class="btn full" id="saveGif" style="margin-top:13px;">✨ 블로그용 GIF 움짤 저장</button>
+        <button class="btn line full" id="saveMp4" style="margin-top:8px;">🎬 세로 영상 저장</button>
+        <div id="clipProgress" hidden>
+          <div class="pbar" style="margin-top:11px;"><i id="clipBar"></i></div>
+          <div class="hint" id="clipBarTxt" style="margin-top:5px;"></div>
+        </div>
+        <div class="savemsg" id="clipMsg" hidden></div>
+        <img id="gifPreview" class="preview-img" alt="GIF 미리보기" hidden>
+        <video id="vidPreview" playsinline webkit-playsinline controls style="width:100%;border-radius:14px;margin-top:10px;display:none;background:#000;" ></video>
+      </div>
+      <p class="foot">🔒 영상·사진은 폰 안에서만 처리되고 어디에도 업로드되지 않아요. 영상 저장에는 <b>소리가 담기지 않아요</b>(무음). 사진·자막·스티커는 화면에서 보는 그대로 담겨요.</p>
+    </section>
   </main>
 
   <nav class="tabbar" role="tablist">
     <button data-tab="photo" class="active" role="tab" aria-selected="true"><span class="ico">📸</span>사진도구</button>
     <button data-tab="quiz" role="tab" aria-selected="false"><span class="ico">🦷</span>청구사퀴즈</button>
     <button data-tab="todo" role="tab" aria-selected="false"><span class="ico">📋</span>일정·계산</button>
+    <button data-tab="clip" role="tab" aria-selected="false"><span class="ico">🎬</span>클립</button>
   </nav>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -430,7 +599,7 @@
   }
 
   /* ================= 탭 전환 ================= */
-  var tabs = ['photo', 'quiz', 'todo'];
+  var tabs = ['photo', 'quiz', 'todo', 'clip'];
   function switchTab(name) {
     tabs.forEach(function (n) {
       $('#tab-' + n).classList.toggle('active', n === name);
@@ -1587,6 +1756,1498 @@
   renderCalc();
   renderChecks();
   updateUndo();
+})();
+</script>
+
+<script>
+/* ================= TAB 4 : 클립 스튜디오 ================= */
+(function () {
+  'use strict';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var stage = $('#stage');
+  if (!stage) return;
+
+  var CW = 720, CH = 1280;
+  var ctx = stage.getContext('2d');
+  stage.width = CW;
+  stage.height = CH;
+
+  var cuts = [], caps = [], stks = [];
+  var sel = null;                 // {type:'cap'|'stk', id}
+  var cur = 0;
+  var playing = false, rafId = null, playBaseT = 0, playBaseNow = 0;
+  var loopPlay = true;
+  var busy = false;
+  var fit = 'cover';
+  var gifLen = 5, gifFromNow = false;
+  var uid = 0;
+  var hitBoxes = [];
+  var hideSel = false;   // 저장(내보내기) 중에는 선택 점선을 그리지 않음
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('#toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('on'); }, 2300);
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+  function nid(p) { uid += 1; return p + Date.now().toString(36) + uid; }
+  function stamp() {
+    var d = new Date();
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '_' + p(d.getHours()) + p(d.getMinutes());
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function round1(v) { return Math.round(v * 10) / 10; }
+
+  /* ================= 타임라인 ================= */
+  function cutLen(c) { return Math.max(0, c.trimE - c.trimS); }
+  function totalDur() {
+    var s = 0;
+    for (var i = 0; i < cuts.length; i++) s += cutLen(cuts[i]);
+    return s;
+  }
+  function activeCut(t) {
+    if (!cuts.length) return null;
+    var acc = 0;
+    for (var i = 0; i < cuts.length; i++) {
+      var d = cutLen(cuts[i]);
+      if (t < acc + d - 0.0001 || i === cuts.length - 1) {
+        return { cut: cuts[i], index: i, local: clamp(t - acc, 0, Math.max(0, d - 0.001)) };
+      }
+      acc += d;
+    }
+    return null;
+  }
+
+  /* ================= 그리기 ================= */
+  function roundRect(g, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.lineTo(x + w - r, y);
+    g.quadraticCurveTo(x + w, y, x + w, y + r);
+    g.lineTo(x + w, y + h - r);
+    g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    g.lineTo(x + r, y + h);
+    g.quadraticCurveTo(x, y + h, x, y + h - r);
+    g.lineTo(x, y + r);
+    g.quadraticCurveTo(x, y, x + r, y);
+    g.closePath();
+  }
+
+  function drawMedia(el, type) {
+    var mw = type === 'video' ? el.videoWidth : el.naturalWidth;
+    var mh = type === 'video' ? el.videoHeight : el.naturalHeight;
+    if (!mw || !mh) return;
+    var s = fit === 'contain' ? Math.min(CW / mw, CH / mh) : Math.max(CW / mw, CH / mh);
+    var w = mw * s, h = mh * s;
+    try { ctx.drawImage(el, (CW - w) / 2, (CH - h) / 2, w, h); } catch (e) { }
+  }
+
+  var FONTS = {
+    gothic: { w: '800', f: '"Apple SD Gothic Neo","Malgun Gothic",sans-serif' },
+    myungjo: { w: '700', f: '"AppleMyungjo","Nanum Myeongjo",serif' },
+    round: { w: '800', f: '"SF Pro Rounded","Apple SD Gothic Neo",sans-serif' },
+    pen: { w: '700', f: '"Nanum Pen Script","Apple SD Gothic Neo",cursive' }
+  };
+  function fontStr(c) {
+    var F = FONTS[c.font] || FONTS.gothic;
+    return F.w + ' ' + Math.round(c.size) + 'px ' + F.f;
+  }
+  function wrapLines(text, maxW) {
+    var out = [];
+    String(text).split('\n').forEach(function (par) {
+      if (!par.length) { out.push(''); return; }
+      var line = '', lastSpace = -1;
+      for (var i = 0; i < par.length; i++) {
+        var ch = par.charAt(i);
+        if (ctx.measureText(line + ch).width > maxW && line.length) {
+          if (lastSpace > 0) {
+            out.push(line.slice(0, lastSpace));
+            line = line.slice(lastSpace + 1) + ch;
+          } else {
+            out.push(line);
+            line = ch;
+          }
+          lastSpace = line.lastIndexOf(' ');
+        } else {
+          line += ch;
+          if (ch === ' ') lastSpace = line.length - 1;
+        }
+      }
+      out.push(line);
+    });
+    return out;
+  }
+
+  function drawCaption(c, t) {
+    if (t < c.start - 0.005 || t > c.end + 0.005) return;
+    if (!c.text) return;
+    ctx.save();
+    ctx.font = fontStr(c);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var fs = Math.round(c.size);
+    var lines = wrapLines(c.text, CW * 0.84);
+    var lh = fs * 1.3;
+    var blockH = lines.length * lh;
+    var cx = c.x * CW, cy = c.y * CH;
+    var wMax = 0;
+    for (var i = 0; i < lines.length; i++) wMax = Math.max(wMax, ctx.measureText(lines[i]).width);
+    var padX = fs * 0.44, padY = fs * 0.28;
+    var boxW = wMax + padX * 2, boxH = blockH + padY * 2;
+    var x0 = cx - boxW / 2, y0 = cy - boxH / 2;
+    if (c.bgOn) {
+      roundRect(ctx, x0, y0, boxW, boxH, Math.min(fs * 0.5, 34));
+      ctx.fillStyle = c.bg;
+      ctx.fill();
+    }
+    for (var k = 0; k < lines.length; k++) {
+      var y = cy - blockH / 2 + lh * (k + 0.5);
+      if (c.strokeOn) {
+        ctx.lineJoin = 'round';
+        ctx.miterLimit = 2;
+        ctx.lineWidth = Math.max(2, fs * 0.16);
+        ctx.strokeStyle = c.stroke;
+        ctx.strokeText(lines[k], cx, y);
+      }
+      ctx.fillStyle = c.color;
+      ctx.fillText(lines[k], cx, y);
+    }
+    ctx.restore();
+    hitBoxes.push({ type: 'cap', id: c.id, x0: x0, y0: y0, x1: x0 + boxW, y1: y0 + boxH });
+  }
+
+  /* ---------- 스티커 프리셋 (전부 벡터/이모지 = 외부 파일 없음) ---------- */
+  function drawStar(g, S) {
+    var c = S / 2, R = S * 0.47, r = S * 0.20;
+    g.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var ang = -Math.PI / 2 + i * Math.PI / 5;
+      var rad = (i % 2 === 0) ? R : r;
+      var px = c + Math.cos(ang) * rad, py = c + Math.sin(ang) * rad;
+      if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.closePath();
+    g.fillStyle = '#FFC94A';
+    g.fill();
+    g.lineWidth = Math.max(2, S * 0.035);
+    g.strokeStyle = 'rgba(255,255,255,.92)';
+    g.lineJoin = 'round';
+    g.stroke();
+  }
+  function drawHeart(g, S) {
+    var c = S / 2, k = S * 0.44;
+    g.beginPath();
+    g.moveTo(c, c + k * 0.82);
+    g.bezierCurveTo(c - k * 1.22, c + k * 0.02, c - k * 0.66, c - k * 0.86, c, c - k * 0.24);
+    g.bezierCurveTo(c + k * 0.66, c - k * 0.86, c + k * 1.22, c + k * 0.02, c, c + k * 0.82);
+    g.closePath();
+    g.fillStyle = '#FF7A1A';
+    g.fill();
+    g.lineWidth = Math.max(2, S * 0.038);
+    g.strokeStyle = 'rgba(255,255,255,.85)';
+    g.stroke();
+  }
+  function drawSparkle(g, S) {
+    var c = S / 2, R = S * 0.48, r = S * 0.11;
+    g.beginPath();
+    for (var i = 0; i < 8; i++) {
+      var ang = -Math.PI / 2 + i * Math.PI / 4;
+      var rad = (i % 2 === 0) ? R : r;
+      var px = c + Math.cos(ang) * rad, py = c + Math.sin(ang) * rad;
+      if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.closePath();
+    g.fillStyle = '#FFD84D';
+    g.fill();
+    g.lineWidth = Math.max(2, S * 0.03);
+    g.strokeStyle = 'rgba(255,255,255,.92)';
+    g.stroke();
+  }
+  function drawBubble(g, S) {
+    var w = S, h = S * 0.7, x = 0, y = S * 0.08, tw = w * 0.22;
+    g.beginPath();
+    g.moveTo(x + tw, y);
+    g.lineTo(x + w - tw, y);
+    g.quadraticCurveTo(x + w, y, x + w, y + tw);
+    g.lineTo(x + w, y + h - tw);
+    g.quadraticCurveTo(x + w, y + h, x + w - tw, y + h);
+    g.lineTo(x + w * 0.56, y + h);
+    g.lineTo(x + w * 0.40, y + h + S * 0.19);
+    g.lineTo(x + w * 0.34, y + h);
+    g.lineTo(x + tw, y + h);
+    g.quadraticCurveTo(x, y + h, x, y + h - tw);
+    g.lineTo(x, y + tw);
+    g.quadraticCurveTo(x, y, x + tw, y);
+    g.closePath();
+    g.fillStyle = '#FFFFFF';
+    g.fill();
+    g.lineWidth = Math.max(2, S * 0.038);
+    g.strokeStyle = '#FF7A1A';
+    g.lineJoin = 'round';
+    g.stroke();
+    g.fillStyle = '#E4660E';
+    g.font = '800 ' + Math.round(S * 0.28) + 'px "Apple SD Gothic Neo",sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('맛집!', w / 2, y + h / 2);
+  }
+  function drawNahong(g, S) {
+    var c = S / 2;
+    g.fillStyle = '#FF9A47';
+    g.beginPath(); g.arc(c - S * 0.25, S * 0.27, S * 0.125, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(c + S * 0.25, S * 0.27, S * 0.125, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#FFD3AC';
+    g.beginPath(); g.arc(c - S * 0.25, S * 0.27, S * 0.062, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(c + S * 0.25, S * 0.27, S * 0.062, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#FF9A47';
+    g.beginPath(); g.arc(c, c + S * 0.06, S * 0.35, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.28)';
+    g.beginPath(); g.arc(c - S * 0.12, c - S * 0.06, S * 0.10, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#3B2B21';
+    g.beginPath(); g.arc(c - S * 0.125, c + S * 0.045, S * 0.042, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(c + S * 0.125, c + S * 0.045, S * 0.042, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,105,105,.5)';
+    g.beginPath(); g.arc(c - S * 0.20, c + S * 0.125, S * 0.055, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(c + S * 0.20, c + S * 0.125, S * 0.055, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#3B2B21';
+    g.lineWidth = Math.max(2, S * 0.028);
+    g.lineCap = 'round';
+    g.beginPath();
+    g.arc(c, c + S * 0.085, S * 0.085, 0.18 * Math.PI, 0.82 * Math.PI);
+    g.stroke();
+  }
+  function drawPreset(kind, x, y, S, g) {
+    g.save();
+    g.translate(x, y);
+    if (kind === 'nahong') drawNahong(g, S);
+    else if (kind === 'star') drawStar(g, S);
+    else if (kind === 'heart') drawHeart(g, S);
+    else if (kind === 'spark') drawSparkle(g, S);
+    else if (kind === 'bubble') drawBubble(g, S);
+    else if (kind === 'food') {
+      g.font = Math.round(S * 0.9) + 'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText('👍', S / 2, S / 2);
+    }
+    g.restore();
+  }
+
+  function drawSticker(s, t) {
+    if (t < s.start - 0.005 || t > s.end + 0.005) return;
+    var S = s.size * CW;
+    if (S < 4) return;
+    ctx.save();
+    ctx.translate(s.x * CW, s.y * CH);
+    var rot = (s.rot || 0) * Math.PI / 180;
+    ctx.rotate(rot);
+    var hw = S / 2, hh = S / 2;
+    if (s.kind === 'image' && s.img) {
+      var iw = s.img.naturalWidth || 1, ih = s.img.naturalHeight || 1;
+      var w = S, h = S * ih / iw;
+      hw = w / 2; hh = h / 2;
+      try { ctx.drawImage(s.img, -hw, -hh, w, h); } catch (e) { }
+    } else {
+      drawPreset(s.preset, -S / 2, -S / 2, S, ctx);
+    }
+    ctx.restore();
+    var cs = Math.cos(rot), sn = Math.sin(rot);
+    var corners = [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]];
+    var bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9;
+    for (var i = 0; i < 4; i++) {
+      var rx = corners[i][0] * cs - corners[i][1] * sn + s.x * CW;
+      var ry = corners[i][0] * sn + corners[i][1] * cs + s.y * CH;
+      if (rx < bx0) bx0 = rx;
+      if (ry < by0) by0 = ry;
+      if (rx > bx1) bx1 = rx;
+      if (ry > by1) by1 = ry;
+    }
+    hitBoxes.push({ type: 'stk', id: s.id, x0: bx0, y0: by0, x1: bx1, y1: by1 });
+  }
+
+  function drawSelOutline() {
+    if (!sel || hideSel) return;
+    var hb = null;
+    for (var i = hitBoxes.length - 1; i >= 0; i--) {
+      if (hitBoxes[i].type === sel.type && hitBoxes[i].id === sel.id) { hb = hitBoxes[i]; break; }
+    }
+    if (!hb) return;
+    ctx.save();
+    ctx.setLineDash([12, 8]);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#FF7A1A';
+    ctx.strokeRect(hb.x0 - 7, hb.y0 - 7, (hb.x1 - hb.x0) + 14, (hb.y1 - hb.y0) + 14);
+    ctx.restore();
+  }
+
+  function drawAt(t) {
+    hitBoxes = [];
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, CW, CH);
+    var a = activeCut(t);
+    if (a) {
+      var m = a.cut;
+      var span = cutLen(m);
+      var srcT = m.trimS + Math.min(a.local, Math.max(0, span - 0.001));
+      if (m.type === 'video') {
+        var v = m.el;
+        if (playing) {
+          if (v.paused) {
+            try { v.currentTime = srcT; v.play().catch(function () { }); } catch (e) { }
+          } else if (Math.abs(v.currentTime - srcT) > 0.28) {
+            try { v.currentTime = srcT; } catch (e) { }
+          }
+        } else if (v.readyState >= 2 && Math.abs(v.currentTime - srcT) > 0.04) {
+          try { v.currentTime = srcT; } catch (e) { }
+        }
+      }
+      drawMedia(m.el, m.type);
+    }
+    for (var i = 0; i < cuts.length; i++) {
+      if (cuts[i] !== (a && a.cut) && cuts[i].type === 'video') {
+        if (!cuts[i].el.paused) { try { cuts[i].el.pause(); } catch (e) { } }
+      }
+    }
+    for (var k = 0; k < caps.length; k++) drawCaption(caps[k], t);
+    for (var j = 0; j < stks.length; j++) drawSticker(stks[j], t);
+    drawSelOutline();
+  }
+
+  /* ================= 재생 ================= */
+  function updateClock() {
+    var T = totalDur();
+    var c = $('#clipClock');
+    if (c) c.textContent = cur.toFixed(1) + ' / ' + T.toFixed(1) + '초';
+    var sk = $('#clipSeek');
+    if (sk) sk.value = T > 0 ? Math.round(clamp(cur / T, 0, 1) * 1000) : 0;
+  }
+  function tick(now) {
+    if (!playing) return;
+    var T = totalDur();
+    if (T <= 0) { pause(); return; }
+    var t = playBaseT + (now - playBaseNow) / 1000;
+    if (t >= T) {
+      if (loopPlay) {
+        playBaseT = 0;
+        playBaseNow = now;
+        cur = 0;
+      } else {
+        cur = Math.max(0, T - 0.001);
+        drawAt(cur);
+        updateClock();
+        pause();
+        return;
+      }
+    } else {
+      cur = t;
+    }
+    drawAt(cur);
+    updateClock();
+    rafId = requestAnimationFrame(tick);
+  }
+  function play(force) {
+    if (!cuts.length) { toast('먼저 영상이나 사진을 추가해 주세요'); return; }
+    if (busy && !force) return;
+    var T = totalDur();
+    if (T <= 0) return;
+    if (cur >= T - 0.03) cur = 0;
+    playing = true;
+    playBaseT = cur;
+    playBaseNow = performance.now();
+    var b = $('#clipPlay');
+    if (b) b.textContent = '⏸ 일시정지';
+    rafId = requestAnimationFrame(tick);
+  }
+  function pause() {
+    playing = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    var b = $('#clipPlay');
+    if (b) b.textContent = '▶ 재생';
+    for (var i = 0; i < cuts.length; i++) {
+      if (cuts[i].type === 'video') { try { cuts[i].el.pause(); } catch (e) { } }
+    }
+  }
+
+  /* ================= 컷 관리 ================= */
+  function afterAdd() {
+    $('#stageEmpty').hidden = cuts.length > 0;
+    if (cur > totalDur()) cur = totalDur();
+    renderCuts();
+    syncTimes();
+    drawAt(cur);
+    updateClock();
+  }
+  function addFiles(files) {
+    var arr = Array.prototype.slice.call(files || []);
+    if (!arr.length) return;
+    var added = 0;
+    arr.forEach(function (f) {
+      var isVideo = /^video\//i.test(f.type) || /\.(mp4|mov|m4v|webm|3gp)$/i.test(f.name);
+      var isImage = /^image\//i.test(f.type) || /\.(jpe?g|png|gif|webp)$/i.test(f.name);
+      if (isVideo) {
+        var v = document.createElement('video');
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.playsInline = true;
+        v.muted = true;
+        v.preload = 'auto';
+        var url = URL.createObjectURL(f);
+        v.src = url;
+        v.addEventListener('loadedmetadata', function () {
+          var d = isFinite(v.duration) ? v.duration : 0;
+          if (!d || d <= 0) { toast('영상 길이를 읽지 못했어요: ' + f.name); return; }
+          cuts.push({
+            id: nid('c'), type: 'video', el: v, url: url, name: f.name,
+            dur: d, trimS: 0, trimE: Math.min(d, 15)
+          });
+          afterAdd();
+          toast('영상 컷을 담았어요 (' + cutLen(cuts[cuts.length - 1]).toFixed(1) + '초)');
+        });
+        v.addEventListener('error', function () { toast('이 영상은 브라우저에서 열 수 없어요: ' + f.name); });
+        try { v.load(); } catch (e) { }
+      } else if (isImage) {
+        var img = new Image();
+        var url2 = URL.createObjectURL(f);
+        img.onload = function () {
+          cuts.push({
+            id: nid('c'), type: 'image', el: img, url: url2, name: f.name,
+            dur: 2.5, trimS: 0, trimE: 2.5
+          });
+          afterAdd();
+          toast('사진 컷을 담았어요 (2.5초)');
+        };
+        img.onerror = function () { toast('이 사진은 브라우저에서 열 수 없어요(HEIC 등): ' + f.name); };
+        img.src = url2;
+      } else {
+        toast('영상·사진 파일만 올릴 수 있어요');
+      }
+      added += 1;
+    });
+    if (added > 1) setTimeout(function () { toast(added + '개를 확인해서 담는 중이에요'); }, 400);
+  }
+
+  function renderCuts() {
+    var T = totalDur();
+    var sum = $('#cutSummary');
+    if (sum) sum.textContent = cuts.length + '컷 · ' + T.toFixed(1) + '초';
+    var list = $('#cutList');
+    if (!list) return;
+    if (!cuts.length) {
+      list.innerHTML = '<div class="emptystate" style="padding:14px 8px;"><span class="face">🎞️</span>아직 컷이 없어요.<br>위에서 영상이나 사진을 골라 주세요!</div>';
+      return;
+    }
+    list.innerHTML = cuts.map(function (c, i) {
+      var thumb = c.type === 'video'
+        ? '<div class="cut-thumb">🎬</div>'
+        : '<div class="cut-thumb"><img src="' + c.url + '" alt=""></div>';
+      return '<div class="cut" data-id="' + c.id + '">' + thumb +
+        '<div class="cut-body">' +
+        '<div class="cut-name">' + (c.type === 'video' ? '영상' : '사진') + ' ' + (i + 1) +
+        ' <span style="font-weight:700;color:#A98D7B;">· ' + cutLen(c).toFixed(1) + '초</span></div>' +
+        '<div class="cut-sub">원본 ' + c.dur.toFixed(1) + '초</div>' +
+        '<div class="trim"><span>앞</span><input type="range" data-k="trimS" min="0" max="' + c.dur.toFixed(1) +
+        '" step="0.1" value="' + c.trimS.toFixed(1) + '"><b>' + c.trimS.toFixed(1) + 's</b></div>' +
+        '<div class="trim"><span>뒤</span><input type="range" data-k="trimE" min="0" max="' + c.dur.toFixed(1) +
+        '" step="0.1" value="' + c.trimE.toFixed(1) + '"><b>' + c.trimE.toFixed(1) + 's</b></div>' +
+        '</div>' +
+        '<div class="cut-tools">' +
+        '<button data-act="up" aria-label="앞으로">▲</button>' +
+        '<button data-act="down" aria-label="뒤로">▼</button>' +
+        '<button data-act="del" aria-label="삭제">×</button>' +
+        '</div></div>';
+    }).join('');
+
+    $$('#cutList .cut').forEach(function (row) {
+      var id = row.getAttribute('data-id');
+      var c = null;
+      for (var i = 0; i < cuts.length; i++) if (cuts[i].id === id) c = cuts[i];
+      if (!c) return;
+      $$('input[type=range]', row).forEach(function (inp) {
+        var k = inp.getAttribute('data-k');
+        inp.addEventListener('input', function () {
+          var v = parseFloat(inp.value);
+          if (isNaN(v)) return;
+          if (k === 'trimS') {
+            c.trimS = clamp(v, 0, Math.max(0, c.trimE - 0.3));
+          } else {
+            c.trimE = clamp(v, c.trimS + 0.3, c.dur);
+          }
+          var labels = $$('.trim b', row);
+          labels[0].textContent = c.trimS.toFixed(1) + 's';
+          labels[1].textContent = c.trimE.toFixed(1) + 's';
+          var nameEl = $('.cut-name span', row);
+          if (nameEl) nameEl.textContent = '· ' + cutLen(c).toFixed(1) + '초';
+          syncTimes();
+          var sumEl = $('#cutSummary');
+          if (sumEl) sumEl.textContent = cuts.length + '컷 · ' + totalDur().toFixed(1) + '초';
+          if (cur > totalDur()) cur = totalDur();
+          drawAt(cur);
+          updateClock();
+        });
+        inp.addEventListener('change', function () { renderCuts(); });
+      });
+      $('[data-act="up"]', row).addEventListener('click', function () { moveCut(id, -1); });
+      $('[data-act="down"]', row).addEventListener('click', function () { moveCut(id, 1); });
+      $('[data-act="del"]', row).addEventListener('click', function () { delCut(id); });
+    });
+  }
+
+  function moveCut(id, dir) {
+    var i = -1;
+    for (var k = 0; k < cuts.length; k++) if (cuts[k].id === id) i = k;
+    var j = i + dir;
+    if (i < 0 || j < 0 || j >= cuts.length) return;
+    var tmp = cuts[i];
+    cuts[i] = cuts[j];
+    cuts[j] = tmp;
+    renderCuts();
+    drawAt(cur);
+  }
+  function delCut(id) {
+    var i = -1;
+    for (var k = 0; k < cuts.length; k++) if (cuts[k].id === id) i = k;
+    if (i < 0) return;
+    if (!window.confirm('이 컷을 지울까요?')) return;
+    var c = cuts[i];
+    try {
+      if (c.type === 'video') {
+        c.el.pause();
+        c.el.removeAttribute('src');
+        c.el.load();
+      }
+    } catch (e) { }
+    try { URL.revokeObjectURL(c.url); } catch (e) { }
+    cuts.splice(i, 1);
+    if (cur > totalDur()) cur = totalDur();
+    afterAdd();
+    toast('컷을 지웠어요');
+  }
+
+  function syncTimes() {
+    var T = totalDur();
+    if (T <= 0) return;
+    caps.forEach(function (c) {
+      c.start = clamp(c.start, 0, Math.max(0, T));
+      c.end = clamp(c.end, c.start, Math.max(c.start, T));
+    });
+    stks.forEach(function (s) {
+      s.start = clamp(s.start, 0, Math.max(0, T));
+      s.end = clamp(s.end, s.start, Math.max(s.start, T));
+    });
+  }
+
+  /* ================= 자막 ================= */
+  function objOf(s) {
+    if (!s) return null;
+    var arr = s.type === 'cap' ? caps : stks;
+    for (var i = 0; i < arr.length; i++) if (arr[i].id === s.id) return arr[i];
+    return null;
+  }
+  function curCap() { return sel && sel.type === 'cap' ? objOf(sel) : null; }
+  function curStk() { return sel && sel.type === 'stk' ? objOf(sel) : null; }
+
+  function addCaption() {
+    var T = totalDur() || 3;
+    var st = clamp(cur, 0, Math.max(0, T - 0.5));
+    var en = Math.min(T, st + 3);
+    if (en <= st) en = Math.min(T, st + 1);
+    caps.push({
+      id: nid('a'), text: '자막을 입력해요', start: round1(st), end: round1(en),
+      x: 0.5, y: 0.78, size: 54, color: '#FFFFFF', bgOn: true, bg: '#FF7A1A',
+      strokeOn: true, stroke: '#3B2B21', font: 'gothic'
+    });
+    sel = { type: 'cap', id: caps[caps.length - 1].id };
+    renderCaps();
+    drawAt(cur);
+    var inp = $('#capText');
+    if (inp) { try { inp.focus(); inp.select(); } catch (e) { } }
+  }
+
+  function renderCaps() {
+    var wrap = $('#capChips');
+    if (!wrap) return;
+    if (!caps.length) {
+      wrap.innerHTML = '<span class="chip-note">+ 자막 버튼을 눌러 첫 자막을 넣어보세요.</span>';
+    } else {
+      wrap.innerHTML = caps.map(function (c) {
+        var on = sel && sel.type === 'cap' && sel.id === c.id;
+        var label = (c.text || '자막').replace(/\s+/g, ' ').slice(0, 9);
+        return '<button class="chip' + (on ? ' on' : '') + '" data-cap="' + c.id + '">' + esc(label) + '</button>';
+      }).join('');
+      $$('#capChips .chip').forEach(function (b) {
+        b.addEventListener('click', function () {
+          sel = { type: 'cap', id: b.getAttribute('data-cap') };
+          renderCaps();
+          drawAt(cur);
+        });
+      });
+    }
+    var c = curCap();
+    var ed = $('#capEditor');
+    if (!c) { ed.hidden = true; return; }
+    ed.hidden = false;
+    $('#capText').value = c.text;
+    $('#capStart').value = round1(c.start);
+    $('#capEnd').value = round1(c.end);
+    $('#capSize').value = c.size;
+    $('#capSizeVal').textContent = c.size;
+    $('#capColor').value = c.color;
+    $('#capStroke').value = c.stroke;
+    $('#capBg').value = c.bg;
+    $('#capBgSw').classList.toggle('on', !!c.bgOn);
+    $('#capBgSw').setAttribute('aria-checked', c.bgOn ? 'true' : 'false');
+    $('#capStrokeSw').classList.toggle('on', !!c.strokeOn);
+    $('#capStrokeSw').setAttribute('aria-checked', c.strokeOn ? 'true' : 'false');
+    $$('#capFontChips .chip').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-font') === c.font);
+    });
+  }
+
+  function updateCapChip(c) {
+    var b = $('#capChips .chip[data-cap="' + c.id + '"]');
+    if (b) b.textContent = (c.text || '자막').replace(/\s+/g, ' ').slice(0, 9);
+  }
+
+  $('#addCaption').addEventListener('click', addCaption);
+  $('#capText').addEventListener('input', function () {
+    var c = curCap();
+    if (!c) return;
+    c.text = this.value;
+    updateCapChip(c);
+    drawAt(cur);
+  });
+  function capTimeInput(which) {
+    var c = curCap();
+    if (!c) return;
+    var v = parseFloat($(which === 'start' ? '#capStart' : '#capEnd').value);
+    if (isNaN(v)) return;
+    var T = totalDur();
+    if (which === 'start') c.start = clamp(v, 0, Math.max(0, Math.min(c.end - 0.1, T)));
+    else c.end = clamp(v, c.start + 0.1, Math.max(c.start + 0.1, T));
+    drawAt(cur);
+  }
+  $('#capStart').addEventListener('change', function () { capTimeInput('start'); renderCaps(); });
+  $('#capEnd').addEventListener('change', function () { capTimeInput('end'); renderCaps(); });
+  $('#capSize').addEventListener('input', function () {
+    var c = curCap();
+    if (!c) return;
+    c.size = parseInt(this.value, 10) || 54;
+    $('#capSizeVal').textContent = c.size;
+    drawAt(cur);
+  });
+  $('#capColor').addEventListener('input', function () {
+    var c = curCap(); if (!c) return;
+    c.color = this.value; drawAt(cur);
+  });
+  $('#capStroke').addEventListener('input', function () {
+    var c = curCap(); if (!c) return;
+    c.stroke = this.value; c.strokeOn = true;
+    $('#capStrokeSw').classList.add('on');
+    drawAt(cur);
+  });
+  $('#capBg').addEventListener('input', function () {
+    var c = curCap(); if (!c) return;
+    c.bg = this.value; c.bgOn = true;
+    $('#capBgSw').classList.add('on');
+    drawAt(cur);
+  });
+  $('#capBgSw').addEventListener('click', function () {
+    var c = curCap(); if (!c) return;
+    c.bgOn = !c.bgOn;
+    this.classList.toggle('on', c.bgOn);
+    this.setAttribute('aria-checked', c.bgOn ? 'true' : 'false');
+    drawAt(cur);
+  });
+  $('#capStrokeSw').addEventListener('click', function () {
+    var c = curCap(); if (!c) return;
+    c.strokeOn = !c.strokeOn;
+    this.classList.toggle('on', c.strokeOn);
+    this.setAttribute('aria-checked', c.strokeOn ? 'true' : 'false');
+    drawAt(cur);
+  });
+  $$('#capFontChips .chip').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var c = curCap(); if (!c) return;
+      c.font = b.getAttribute('data-font');
+      $$('#capFontChips .chip').forEach(function (x) { x.classList.toggle('on', x === b); });
+      drawAt(cur);
+    });
+  });
+  $('#capDel').addEventListener('click', function () {
+    var c = curCap();
+    if (!c) return;
+    if (!window.confirm('이 자막을 지울까요?')) return;
+    caps = caps.filter(function (x) { return x.id !== c.id; });
+    sel = null;
+    renderCaps();
+    drawAt(cur);
+  });
+
+  /* ================= 스티커 ================= */
+  var PRESETS = [
+    { k: 'nahong', label: '나홍이', ico: '🍊' },
+    { k: 'star', label: '별', ico: '⭐' },
+    { k: 'heart', label: '하트', ico: '🧡' },
+    { k: 'spark', label: '반짝', ico: '✨' },
+    { k: 'food', label: '맛집', ico: '👍' },
+    { k: 'bubble', label: '말풍선', ico: '💬' }
+  ];
+  (function buildPresetGrid() {
+    var g = $('#stkGrid');
+    g.innerHTML = PRESETS.map(function (p) {
+      return '<button data-preset="' + p.k + '"><span>' + p.ico + '</span>' + p.label + '</button>';
+    }).join('');
+    $$('#stkGrid button').forEach(function (b) {
+      b.addEventListener('click', function () { addSticker(b.getAttribute('data-preset')); });
+    });
+  })();
+
+  function addSticker(preset) {
+    var T = totalDur() || 3;
+    stks.push({
+      id: nid('s'), kind: 'preset', preset: preset, img: null,
+      x: 0.5, y: 0.42, size: 0.3, rot: 0, start: 0, end: round1(T)
+    });
+    sel = { type: 'stk', id: stks[stks.length - 1].id };
+    renderStks();
+    drawAt(cur);
+    toast('스티커를 붙였어요 — 끌어서 옮겨보세요');
+  }
+
+  $('#stickerFile').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    var img = new Image();
+    var url = URL.createObjectURL(f);
+    img.onload = function () {
+      var T = totalDur() || 3;
+      stks.push({
+        id: nid('s'), kind: 'image', preset: null, img: img, url: url,
+        x: 0.5, y: 0.42, size: 0.3, rot: 0, start: 0, end: round1(T)
+      });
+      sel = { type: 'stk', id: stks[stks.length - 1].id };
+      renderStks();
+      drawAt(cur);
+      toast('내 이미지를 스티커로 붙였어요');
+    };
+    img.onerror = function () { toast('이 이미지는 열 수 없어요'); };
+    img.src = url;
+  });
+
+  function renderStks() {
+    var wrap = $('#stkChips');
+    if (!wrap) return;
+    if (!stks.length) {
+      wrap.innerHTML = '<span class="chip-note">위 스티커를 누르면 미리보기에 붙어요.</span>';
+    } else {
+      wrap.innerHTML = stks.map(function (s, i) {
+        var on = sel && sel.type === 'stk' && sel.id === s.id;
+        var label = s.kind === 'image' ? '내 이미지' : (function () {
+          for (var k = 0; k < PRESETS.length; k++) if (PRESETS[k].k === s.preset) return PRESETS[k].ico + ' ' + PRESETS[k].label;
+          return '스티커';
+        })();
+        return '<button class="chip' + (on ? ' on' : '') + '" data-stk="' + s.id + '">' + esc(label) + '</button>';
+      }).join('');
+      $$('#stkChips .chip').forEach(function (b) {
+        b.addEventListener('click', function () {
+          sel = { type: 'stk', id: b.getAttribute('data-stk') };
+          renderStks();
+          drawAt(cur);
+        });
+      });
+    }
+    var s = curStk();
+    var ed = $('#stkEditor');
+    if (!s) { ed.hidden = true; return; }
+    ed.hidden = false;
+    $('#stkSize').value = Math.round(s.size * 100);
+    $('#stkSizeVal').textContent = Math.round(s.size * 100) + '%';
+    $('#stkRot').value = s.rot || 0;
+    $('#stkRotVal').textContent = Math.round(s.rot || 0) + '°';
+    $('#stkStart').value = round1(s.start);
+    $('#stkEnd').value = round1(s.end);
+  }
+
+  $('#stkSize').addEventListener('input', function () {
+    var s = curStk(); if (!s) return;
+    s.size = clamp((parseInt(this.value, 10) || 30) / 100, 0.04, 1.4);
+    $('#stkSizeVal').textContent = Math.round(s.size * 100) + '%';
+    drawAt(cur);
+  });
+  $('#stkRot').addEventListener('input', function () {
+    var s = curStk(); if (!s) return;
+    s.rot = parseInt(this.value, 10) || 0;
+    $('#stkRotVal').textContent = s.rot + '°';
+    drawAt(cur);
+  });
+  $('#stkStart').addEventListener('change', function () {
+    var s = curStk(); if (!s) return;
+    var v = parseFloat(this.value);
+    if (isNaN(v)) return;
+    s.start = clamp(v, 0, Math.max(0, Math.min(s.end - 0.1, totalDur())));
+    renderStks();
+    drawAt(cur);
+  });
+  $('#stkEnd').addEventListener('change', function () {
+    var s = curStk(); if (!s) return;
+    var v = parseFloat(this.value);
+    if (isNaN(v)) return;
+    var T = totalDur();
+    s.end = clamp(v, s.start + 0.1, Math.max(s.start + 0.1, T));
+    renderStks();
+    drawAt(cur);
+  });
+  $('#stkDel').addEventListener('click', function () {
+    var s = curStk();
+    if (!s) return;
+    if (!window.confirm('이 스티커를 지울까요?')) return;
+    stks = stks.filter(function (x) { return x.id !== s.id; });
+    sel = null;
+    renderStks();
+    drawAt(cur);
+  });
+  $('#stkCenter').addEventListener('click', function () {
+    var s = curStk();
+    if (!s) { toast('먼저 미리보기에서 스티커를 골라주세요'); return; }
+    s.x = 0.5; s.y = 0.42;
+    drawAt(cur);
+  });
+  $('#stkFront').addEventListener('click', function () {
+    var s = curStk();
+    if (!s) { toast('먼저 미리보기에서 스티커를 골라주세요'); return; }
+    stks = stks.filter(function (x) { return x.id !== s.id; });
+    stks.push(s);
+    drawAt(cur);
+  });
+
+  /* ================= 손가락 드래그 ================= */
+  var drag = null;
+  function stagePt(e) {
+    var r = stage.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / Math.max(1, r.width), y: (e.clientY - r.top) / Math.max(1, r.height) };
+  }
+  stage.addEventListener('pointerdown', function (e) {
+    if (!cuts.length) return;
+    var p = stagePt(e);
+    var px = p.x * CW, py = p.y * CH;
+    var found = null;
+    for (var i = hitBoxes.length - 1; i >= 0; i--) {
+      var b = hitBoxes[i];
+      if (px >= b.x0 && px <= b.x1 && py >= b.y0 && py <= b.y1) { found = b; break; }
+    }
+    if (found) {
+      sel = { type: found.type, id: found.id };
+      var o = objOf(sel);
+      drag = { dx: p.x - o.x, dy: p.y - o.y };
+      try { stage.setPointerCapture(e.pointerId); } catch (err) { }
+      if (e.cancelable) e.preventDefault();
+    } else {
+      sel = null;
+      drag = null;
+    }
+    renderCaps();
+    renderStks();
+    drawAt(cur);
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var p = stagePt(e);
+    var o = objOf(sel);
+    if (!o) return;
+    o.x = clamp(p.x - drag.dx, 0, 1);
+    o.y = clamp(p.y - drag.dy, 0, 1);
+    if (e.cancelable) e.preventDefault();
+    drawAt(cur);
+  });
+  function endDrag(e) {
+    if (!drag) return;
+    drag = null;
+    try { if (e && e.pointerId != null) stage.releasePointerCapture(e.pointerId); } catch (err) { }
+  }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+  stage.addEventListener('pointerleave', endDrag);
+
+  /* ================= 재생·시크·옵션 ================= */
+  $('#clipPlay').addEventListener('click', function () { if (playing) pause(); else play(); });
+  $('#clipRewind').addEventListener('click', function () {
+    pause();
+    cur = 0;
+    drawAt(0);
+    updateClock();
+  });
+  $('#clipLoop').addEventListener('click', function () {
+    loopPlay = !loopPlay;
+    this.textContent = loopPlay ? '🔁 반복 켜짐' : '➡️ 한 번만 재생';
+  });
+  $('#clipReset').addEventListener('click', function () {
+    if (!cuts.length && !caps.length && !stks.length) { toast('지울 게 없어요'); return; }
+    if (!window.confirm('컷·자막·스티커를 모두 지울까요?')) return;
+    pause();
+    cuts.forEach(function (c) {
+      try {
+        if (c.type === 'video') { c.el.pause(); c.el.removeAttribute('src'); c.el.load(); }
+      } catch (e) { }
+      try { URL.revokeObjectURL(c.url); } catch (e) { }
+    });
+    cuts = []; caps = []; stks = []; sel = null; cur = 0;
+    $('#stageEmpty').hidden = false;
+    afterAdd();
+    renderCaps();
+    renderStks();
+    toast('모두 지웠어요');
+  });
+  $('#clipSeek').addEventListener('input', function () {
+    var T = totalDur();
+    if (T <= 0) return;
+    if (playing) pause();
+    cur = clamp((this.value / 1000) * T, 0, T);
+    drawAt(cur);
+    updateClock();
+  });
+  $('#clipFile').addEventListener('change', function () {
+    addFiles(this.files);
+    this.value = '';
+  });
+  $$('#fitSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      fit = b.getAttribute('data-fit');
+      $$('#fitSeg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      drawAt(cur);
+    });
+  });
+  $$('#gifLenSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      gifLen = parseInt(b.getAttribute('data-len'), 10) || 5;
+      $$('#gifLenSeg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+    });
+  });
+  $$('#gifFromSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      gifFromNow = b.getAttribute('data-from') === 'now';
+      $$('#gifFromSeg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+    });
+  });
+
+  var clipTabBtn = $('.tabbar button[data-tab="clip"]');
+  if (clipTabBtn) {
+    clipTabBtn.addEventListener('click', function () {
+      setTimeout(function () { drawAt(cur); updateClock(); }, 40);
+    });
+  }
+
+  /* ================= 진행률 ================= */
+  function progress(frac, text) {
+    var wrapEl = $('#clipProgress');
+    if (wrapEl) wrapEl.hidden = false;
+    var bar = $('#clipBar');
+    if (bar) bar.style.width = (clamp(frac, 0, 1) * 100).toFixed(1) + '%';
+    var txt = $('#clipBarTxt');
+    if (txt) txt.textContent = text || '';
+  }
+  function busyStart(msg) {
+    busy = true;
+    ['#saveGif', '#saveMp4'].forEach(function (s) { var b = $(s); if (b) b.disabled = true; });
+    $('#clipMsg').hidden = true;
+    $('#gifPreview').hidden = true;
+    $('#vidPreview').style.display = 'none';
+    progress(0, msg || '준비 중…');
+  }
+  function busyEnd() {
+    busy = false;
+    ['#saveGif', '#saveMp4'].forEach(function (s) { var b = $(s); if (b) b.disabled = false; });
+    var w = $('#clipProgress');
+    if (w) w.hidden = true;
+  }
+  function say(html) {
+    var m = $('#clipMsg');
+    if (!m) return;
+    m.hidden = false;
+    m.innerHTML = html;
+  }
+  function tick0() { return new Promise(function (r) { setTimeout(r, 0); }); }
+  function rafWait() { return new Promise(function (r) { requestAnimationFrame(function () { r(); }); }); }
+
+  function seekTo(v, t) {
+    return new Promise(function (res) {
+      var done = false;
+      function fin() {
+        if (done) return;
+        done = true;
+        v.removeEventListener('seeked', onS);
+        clearTimeout(tm);
+        res();
+      }
+      function onS() { fin(); }
+      v.addEventListener('seeked', onS);
+      var tm = setTimeout(fin, 900);
+      try {
+        v.pause();
+        v.currentTime = clamp(t, 0, Math.max(0, (isFinite(v.duration) ? v.duration : t) - 0.04));
+      } catch (e) { fin(); }
+    });
+  }
+  function blobDuration(url) {
+    return new Promise(function (res) {
+      var v = document.createElement('video');
+      var done = false;
+      function fin(d) {
+        if (done) return;
+        done = true;
+        try { v.removeAttribute('src'); } catch (e) { }
+        res(d);
+      }
+      v.preload = 'metadata';
+      v.onloadedmetadata = function () { fin(isFinite(v.duration) ? v.duration : 0); };
+      v.onerror = function () { fin(0); };
+      setTimeout(function () { fin(0); }, 4000);
+      v.src = url;
+    });
+  }
+  async function renderAt(t) {
+    var a = activeCut(t);
+    if (a && a.cut.type === 'video') {
+      var v = a.cut.el;
+      var span = cutLen(a.cut);
+      var want = a.cut.trimS + Math.min(a.local, Math.max(0, span - 0.001));
+      if (Math.abs(v.currentTime - want) > 0.02) await seekTo(v, want);
+      await rafWait();
+      await rafWait();
+    }
+    drawAt(t);
+  }
+
+  /* ================= GIF 인코더 (순수 JS, 오프라인) ================= */
+  function ByteBuf(n) {
+    this.a = new Uint8Array(n || 65536);
+    this.n = 0;
+  }
+  ByteBuf.prototype._grow = function (need) {
+    if (this.n + need <= this.a.length) return;
+    var size = this.a.length;
+    while (size < this.n + need) size *= 2;
+    var na = new Uint8Array(size);
+    na.set(this.a.subarray(0, this.n));
+    this.a = na;
+  };
+  ByteBuf.prototype.u8 = function (b) {
+    this._grow(1);
+    this.a[this.n++] = b & 255;
+  };
+  ByteBuf.prototype.u16 = function (v) {
+    this._grow(2);
+    this.a[this.n++] = v & 255;
+    this.a[this.n++] = (v >> 8) & 255;
+  };
+  ByteBuf.prototype.str = function (s) {
+    this._grow(s.length);
+    for (var i = 0; i < s.length; i++) this.a[this.n++] = s.charCodeAt(i) & 255;
+  };
+  ByteBuf.prototype.buf = function (arr) {
+    this._grow(arr.length);
+    this.a.set(arr, this.n);
+    this.n += arr.length;
+  };
+  ByteBuf.prototype.bytes = function () { return this.a.slice(0, this.n); };
+
+  var LZW_DICT = new Int32Array(4096 * 256);
+  var LZW_TOUCH = new Int32Array(4096);
+  function lzwEncode(indices, minCode) {
+    var dict = LZW_DICT, touch = LZW_TOUCH, tn = 0;
+    var clearCode = 1 << minCode, eoiCode = clearCode + 1;
+    var nextCode = eoiCode + 1, codeSize = minCode + 1;
+    var out = [], acc = 0, bits = 0;
+    function emit(code) {
+      acc |= code << bits;
+      bits += codeSize;
+      while (bits >= 8) {
+        out.push(acc & 255);
+        acc >>= 8;
+        bits -= 8;
+      }
+    }
+    function resetDict() {
+      for (var i = 0; i < tn; i++) dict[touch[i]] = 0;
+      tn = 0;
+      nextCode = eoiCode + 1;
+      codeSize = minCode + 1;
+    }
+    emit(clearCode);
+    var curCode = indices[0];
+    for (var i = 1; i < indices.length; i++) {
+      var c = indices[i];
+      var key = (curCode << 8) | c;
+      var v = dict[key];
+      if (v > 0) { curCode = v; continue; }
+      emit(curCode);
+      if (nextCode === 4096) {
+        emit(clearCode);
+        resetDict();
+      } else {
+        if (nextCode >= (1 << codeSize)) codeSize++;
+        dict[key] = nextCode++;
+        touch[tn++] = key;
+      }
+      curCode = c;
+    }
+    emit(curCode);
+    emit(eoiCode);
+    if (bits > 0) out.push(acc & 255);
+    resetDict();
+    return new Uint8Array(out);
+  }
+
+  var BAYER4 = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+  function buildPalette(frames, maxColors) {
+    var samples = [];
+    var totalPx = frames.length * (frames[0].length / 3);
+    var stride = Math.max(1, Math.floor(totalPx / 60000));
+    for (var f = 0; f < frames.length; f++) {
+      var d = frames[f];
+      for (var i = 0; i < d.length; i += 3 * stride) samples.push([d[i], d[i + 1], d[i + 2]]);
+    }
+    if (!samples.length) samples.push([0, 0, 0]);
+    function boxRange(box) {
+      var mn0 = 255, mn1 = 255, mn2 = 255, mx0 = 0, mx1 = 0, mx2 = 0;
+      for (var i = 0; i < box.length; i++) {
+        var r = box[i][0], g = box[i][1], b = box[i][2];
+        if (r < mn0) mn0 = r; if (r > mx0) mx0 = r;
+        if (g < mn1) mn1 = g; if (g > mx1) mx1 = g;
+        if (b < mn2) mn2 = b; if (b > mx2) mx2 = b;
+      }
+      return [mx0 - mn0, mx1 - mn1, mx2 - mn2];
+    }
+    var boxes = [samples];
+    while (boxes.length < maxColors) {
+      var bi = -1, best = -1, bestCh = 0;
+      for (var k = 0; k < boxes.length; k++) {
+        if (boxes[k].length < 2) continue;
+        var rg = boxRange(boxes[k]);
+        var sc = Math.max(rg[0], rg[1], rg[2]) * Math.log(boxes[k].length + 1);
+        if (sc > best) {
+          best = sc;
+          bi = k;
+          bestCh = (rg[0] >= rg[1] && rg[0] >= rg[2]) ? 0 : (rg[1] >= rg[2] ? 1 : 2);
+        }
+      }
+      if (bi < 0) break;
+      var box = boxes[bi];
+      box.sort(function (p, q) { return p[bestCh] - q[bestCh]; });
+      var mid = box.length >> 1;
+      boxes.splice(bi, 1, box.slice(0, mid), box.slice(mid));
+    }
+    var pal = new Uint8Array(768);
+    var count = Math.min(boxes.length, maxColors);
+    for (var j = 0; j < count; j++) {
+      var bb = boxes[j], sr = 0, sg = 0, sb = 0;
+      for (var q = 0; q < bb.length; q++) { sr += bb[q][0]; sg += bb[q][1]; sb += bb[q][2]; }
+      var n = bb.length || 1;
+      pal[j * 3] = Math.round(sr / n);
+      pal[j * 3 + 1] = Math.round(sg / n);
+      pal[j * 3 + 2] = Math.round(sb / n);
+    }
+    return { pal: pal, count: count };
+  }
+
+  function GifBuilder(W, H, palInfo, delayCs) {
+    this.W = W;
+    this.H = H;
+    this.pal = palInfo.pal;
+    this.nCol = Math.max(2, palInfo.count);
+    this.delay = delayCs;
+    this.out = new ByteBuf(W * H + 65536);
+    this.cache = new Uint8Array(32768);
+    this.cacheOn = new Uint8Array(32768);
+    this.writeHeader();
+  }
+  GifBuilder.prototype.writeHeader = function () {
+    var o = this.out;
+    o.str('GIF89a');
+    o.u16(this.W);
+    o.u16(this.H);
+    o.u8(0xF7);
+    o.u8(0);
+    o.u8(0);
+    o.buf(this.pal);
+    o.u8(0x21); o.u8(0xFF); o.u8(0x0B);
+    o.str('NETSCAPE2.0');
+    o.u8(0x03); o.u8(0x01); o.u16(0); o.u8(0x00);
+  };
+  GifBuilder.prototype.nearest = function (r, g, b) {
+    var key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+    if (this.cacheOn[key]) return this.cache[key];
+    var bi = 0, bd = 1e18, pal = this.pal, n = this.nCol;
+    for (var i = 0; i < n; i++) {
+      var dr = r - pal[i * 3], dg = g - pal[i * 3 + 1], db = b - pal[i * 3 + 2];
+      var dd = dr * dr * 3 + dg * dg * 4 + db * db * 2;
+      if (dd < bd) { bd = dd; bi = i; }
+    }
+    this.cache[key] = bi;
+    this.cacheOn[key] = 1;
+    return bi;
+  };
+  GifBuilder.prototype.addFrame = function (rgb) {
+    var W = this.W, H = this.H, o = this.out;
+    o.u8(0x21); o.u8(0xF9); o.u8(0x04); o.u8(0x04);
+    o.u16(this.delay);
+    o.u8(0); o.u8(0);
+    o.u8(0x2C); o.u16(0); o.u16(0); o.u16(W); o.u16(H); o.u8(0);
+    var idx = new Uint8Array(W * H);
+    var p = 0;
+    for (var y = 0; y < H; y++) {
+      var row = BAYER4[y & 3];
+      for (var x = 0; x < W; x++) {
+        var r = rgb[p], g = rgb[p + 1], b = rgb[p + 2];
+        p += 3;
+        var dv = (row[x & 3] / 16 - 0.46875) * 14;
+        var rr = r + dv, gg = g + dv, bb = b + dv;
+        rr = rr < 0 ? 0 : (rr > 255 ? 255 : rr);
+        gg = gg < 0 ? 0 : (gg > 255 ? 255 : gg);
+        bb = bb < 0 ? 0 : (bb > 255 ? 255 : bb);
+        idx[y * W + x] = this.nearest(rr | 0, gg | 0, bb | 0);
+      }
+    }
+    var lzw = lzwEncode(idx, 8);
+    o.u8(8);
+    var i = 0;
+    while (i < lzw.length) {
+      var n = Math.min(255, lzw.length - i);
+      o.u8(n);
+      o.buf(lzw.subarray(i, i + n));
+      i += n;
+    }
+    o.u8(0);
+  };
+  GifBuilder.prototype.finish = function () {
+    this.out.u8(0x3B);
+    return this.out.bytes();
+  };
+
+  /* ================= GIF 저장 ================= */
+  async function exportGif() {
+    if (busy) return;
+    if (!cuts.length) { toast('먼저 영상이나 사진을 추가해 주세요'); return; }
+    var T = totalDur();
+    if (T <= 0) { toast('담긴 컷 길이가 0초예요'); return; }
+    pause();
+    busyStart('GIF 준비 중…');
+    hideSel = true;
+    try {
+      var wantLen = gifLen === 99 ? T : gifLen;
+      var len = Math.min(wantLen, T, 10);
+      var FPS = len <= 6 ? 10 : 7;
+      var DELAY = Math.round(100 / FPS);
+      var W = 320, H = 568;
+      var startT = gifFromNow ? clamp(cur, 0, Math.max(0, T - len)) : 0;
+      var n = Math.max(2, Math.round(len * FPS));
+      if (n > 70) n = 70;
+      var off = document.createElement('canvas');
+      off.width = W;
+      off.height = H;
+      var octx = off.getContext('2d', { willReadFrequently: true });
+      var frames = [];
+      for (var i = 0; i < n; i++) {
+        var t = Math.min(T - 0.01, startT + i / FPS);
+        await renderAt(t);
+        octx.drawImage(stage, 0, 0, W, H);
+        var img = octx.getImageData(0, 0, W, H).data;
+        var rgb = new Uint8Array(W * H * 3);
+        var p = 0, q = 0;
+        for (; p < img.length; p += 4) {
+          rgb[q++] = img[p];
+          rgb[q++] = img[p + 1];
+          rgb[q++] = img[p + 2];
+        }
+        frames.push(rgb);
+        progress(0.02 + (i + 1) / n * 0.5, 'GIF 프레임 ' + (i + 1) + '/' + n + ' 담는 중');
+        await tick0();
+      }
+      progress(0.55, '색상표 정리 중…');
+      await tick0();
+      var palInfo = buildPalette(frames, 256);
+      var gb = new GifBuilder(W, H, palInfo, DELAY);
+      for (var f = 0; f < frames.length; f++) {
+        gb.addFrame(frames[f]);
+        frames[f] = null;
+        progress(0.56 + (f + 1) / frames.length * 0.42, 'GIF 압축 ' + Math.round((f + 1) / n * 100) + '%');
+        await tick0();
+      }
+      progress(0.99, '파일 만드는 중…');
+      var bytes = gb.finish();
+      var blob = new Blob([bytes], { type: 'image/gif' });
+      var url = URL.createObjectURL(blob);
+      var name = 'nahong_gif_' + stamp() + '.gif';
+      var imgEl = $('#gifPreview');
+      imgEl.src = url;
+      imgEl.hidden = false;
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
+      var kb = blob.size / 1024;
+      var sizeTxt = kb > 1024 ? (kb / 1024).toFixed(1) + 'MB' : Math.round(kb) + 'KB';
+      say('✅ GIF 만들었어요!<br>' + W + '×' + H + ' · ' + n + '프레임 · ' + len.toFixed(1) + '초 · ' + sizeTxt +
+        '<br>다운로드가 안 보이면 위 미리보기 이미지를 <b>길게 눌러 ‘사진에 저장’</b>해 주세요.');
+      toast('GIF 저장 완료 (' + sizeTxt + ')');
+    } catch (e) {
+      say('⚠️ GIF를 만드는 중 문제가 생겼어요: ' + (e && e.message ? e.message : e) + '<br>사진을 줄이거나 길이를 짧게 해서 다시 시도해 주세요.');
+    } finally {
+      hideSel = false;
+      busyEnd();
+      drawAt(cur);
+      updateClock();
+    }
+  }
+
+  /* ================= 세로 영상 저장 (MediaRecorder) ================= */
+  function pickMime() {
+    if (typeof MediaRecorder === 'undefined') return '';
+    var types = [
+      'video/mp4;codecs=avc1.42001E',
+      'video/mp4;codecs=avc1',
+      'video/mp4',
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm'
+    ];
+    for (var i = 0; i < types.length; i++) {
+      try { if (MediaRecorder.isTypeSupported(types[i])) return types[i]; } catch (e) { }
+    }
+    return '';
+  }
+  async function exportVideo() {
+    if (busy) return;
+    if (!cuts.length) { toast('먼저 영상이나 사진을 추가해 주세요'); return; }
+    if (typeof MediaRecorder === 'undefined') {
+      say('⚠️ 이 브라우저는 영상 녹화를 지원하지 않아요.<br>아이폰은 <b>사파리 최신 버전</b>에서 열면 돼요. 지금은 ✨ GIF 저장을 이용해 주세요.');
+      return;
+    }
+    if (!stage.captureStream) {
+      say('⚠️ 이 브라우저는 캔버스 녹화를 지원하지 않아요.<br>✨ GIF 저장을 이용해 주세요.');
+      return;
+    }
+    var mime = pickMime();
+    if (!mime) {
+      say('⚠️ 저장할 수 있는 영상 형식을 찾지 못했어요.<br>✨ GIF 저장을 이용해 주세요.');
+      return;
+    }
+    var T = totalDur();
+    if (T <= 0) { toast('담긴 컷 길이가 0초예요'); return; }
+    if (T > 120) { toast('영상이 너무 길어요 (2분 이하로 잘라 주세요)'); return; }
+    pause();
+    busyStart('녹화 준비 중…');
+    hideSel = true;
+    var wasLoop = loopPlay;
+    loopPlay = false;
+    var rec = null, stream = null, chunks = [], stopped = null;
+    try {
+      // 영상 디코더 예열
+      for (var i = 0; i < cuts.length; i++) {
+        if (cuts[i].type === 'video') await seekTo(cuts[i].el, cuts[i].trimS);
+      }
+      cur = 0;
+      drawAt(0);
+      stream = stage.captureStream(30);
+      try {
+        rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8000000 });
+      } catch (e2) {
+        rec = new MediaRecorder(stream);
+        mime = rec.mimeType || 'video/webm';
+      }
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      stopped = new Promise(function (res) { rec.onstop = function () { res(); }; });
+      rec.start(250);
+      progress(0.02, '녹화 시작! 화면이 그대로 저장돼요');
+      play(true);
+      var recT0 = performance.now();
+      await new Promise(function (res) {
+        var iv = setInterval(function () {
+          var T2 = totalDur();
+          var f = T2 > 0 ? clamp(cur / T2, 0, 1) : 0;
+          progress(0.02 + f * 0.96, '녹화 중… ' + Math.round(f * 100) + '%');
+          if (!playing) { clearInterval(iv); res(); }
+        }, 200);
+        setTimeout(function () { clearInterval(iv); if (playing) pause(); res(); }, Math.max(8000, T * 1000 + 8000));
+      });
+      progress(0.99, '파일 정리 중…');
+      await new Promise(function (r) { setTimeout(r, 350); });
+      try { rec.stop(); } catch (e3) { }
+      await Promise.race([stopped, new Promise(function (r) { setTimeout(r, 4000); })]);
+      var recSecs = (performance.now() - recT0) / 1000;
+      if (recSecs < T * 0.5) {
+        say('⚠️ 녹화가 ' + recSecs.toFixed(1) + '초 만에 끝나 버렸어요.<br>' +
+          '화면을 벗어나지 않은 상태에서 다시 한 번 눌러 주세요. 계속 안 되면 ✨ GIF 저장을 이용해 주세요.');
+        return;
+      }
+      var ext = /mp4/i.test(mime) ? 'mp4' : 'webm';
+      var blob = new Blob(chunks, { type: mime.split(';')[0] });
+      var url = URL.createObjectURL(blob);
+      var name = 'nahong_clip_' + stamp() + '.' + ext;
+      var vEl = $('#vidPreview');
+      vEl.src = url;
+      vEl.style.display = 'block';
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
+      var mb = blob.size / 1048576;
+      var sizeTxt = mb >= 1 ? mb.toFixed(1) + 'MB' : Math.round(blob.size / 1024) + 'KB';
+      var realDur = await blobDuration(url);
+      var tooShort = realDur > 0.2 && Math.abs(realDur - T) > Math.max(0.4, T * 0.12);
+      if (tooShort) {
+        say('⚠️ 영상은 만들어졌지만 길이가 <b>' + realDur.toFixed(1) + '초</b>로 저장됐어요 (타임라인 ' + T.toFixed(1) + '초).<br>' +
+          '폰이 녹화를 실시간으로 따라가지 못할 때 생겨요. 다른 앱을 닫고 한 번 더 눌러보시고, 계속 그러면 <b>✨ GIF 저장</b>을 써 주세요.<br>' +
+          '위 미리보기에서 그대로 재생되고, 길게 누르면 저장할 수 있어요. 소리는 담기지 않아요(무음).');
+      } else if (ext === 'mp4') {
+        say('✅ 세로 영상 만들었어요! (' + ext + ', ' + sizeTxt + ', ' + (realDur > 0.2 ? realDur.toFixed(1) : T.toFixed(1)) + '초)<br>다운로드가 안 보이면 위 영상을 <b>길게 눌러 ‘비디오 저장’</b>해 주세요.<br>소리는 담기지 않아요(무음).');
+      } else {
+        say('✅ 영상을 만들었어요 (webm, ' + sizeTxt + ')<br>이 브라우저는 mp4 녹화가 안 돼서 webm으로 저장됐어요. 네이버 클립에는 mp4가 필요하니, 가능하면 ✨ GIF로 저장하거나 사파리 최신 버전에서 다시 시도해 주세요.<br>소리는 담기지 않아요(무음).');
+      }
+      toast('영상 저장 완료 (' + sizeTxt + ')');
+    } catch (e) {
+      say('⚠️ 영상 저장 중 문제가 생겼어요: ' + (e && e.message ? e.message : e) + '<br>✨ GIF 저장으로도 만들 수 있어요.');
+      try { if (rec && rec.state !== 'inactive') rec.stop(); } catch (e4) { }
+    } finally {
+      loopPlay = wasLoop;
+      hideSel = false;
+      busyEnd();
+      pause();
+      cur = 0;
+      drawAt(0);
+      updateClock();
+    }
+  }
+
+  $('#saveGif').addEventListener('click', exportGif);
+  $('#saveMp4').addEventListener('click', exportVideo);
+
+  /* ================= 초기화 ================= */
+  renderCuts();
+  renderCaps();
+  renderStks();
+  drawAt(0);
+  updateClock();
 })();
 </script>
 </body>
